@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,9 +22,11 @@ const (
 
 func OpenLoginPage(clientID string) {
 	authURL := fmt.Sprintf(
-		"%s?client_id=%s&response_type=code&redirect_uri=%s&scope=user-read-private user-read-email",
+		"%s?client_id=%s&response_type=code&redirect_uri=%s&scope=%s",
 		SPOTIFY_AUTH_URL, clientID, url.QueryEscape(REDIRECT_URI),
+		url.QueryEscape("user-read-private user-read-email user-read-playback-state"),
 	)
+	
 
 	err := exec.Command("xdg-open", authURL).Start() // Linux
 	if err != nil {
@@ -122,4 +125,38 @@ func GetRecommendations(accessToken, genre string, limit int) (SpotifyRecommenda
 	}
 
 	return recs, nil
+}
+
+// TODO: add possibility to pass in additional query parameters like in reccomendations
+func genericFetch[T any](endpoint, accessToken string) (T, error) {
+	var result T
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return result, err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return result, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusForbidden {
+		return result, fmt.Errorf("missing required permissions")
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return result, err
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return result, err
+	}
+
+	return result, nil
 }

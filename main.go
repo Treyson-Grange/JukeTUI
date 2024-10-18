@@ -29,9 +29,23 @@ func main() {
 
 	fmt.Println("Login successful! Access token retrieved.")
 	fmt.Println("Fetching recommendations...")
+
+	//POC, delete this
 	fetchRecommendations(token.AccessToken)
+
+	pbState := handleGenericFetch[PlaybackState](PLAYBACK_ENDPOINT, token.AccessToken)
+	fmt.Printf("Playback state: %+v\n", pbState.Item.Album.Artists[0].Name)
 }
 
+func handleGenericFetch[T any](endpoint string, accessToken string) T {
+	data, err := genericFetch[T](endpoint, accessToken)
+	if err != nil {
+		log.Fatalf("Failed to fetch playback state: %v", err)
+	}
+	return data
+}
+
+// POC, delete this
 func fetchRecommendations(accessToken string) {
 	// Example: Use the Spotify API to fetch recommendations.
 	recs, err := GetRecommendations(accessToken, "pop", 5) // Example usage

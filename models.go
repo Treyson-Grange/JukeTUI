@@ -25,3 +25,84 @@ type SpotifyRecommendations struct {
 		} `json:"artists"`
 	} `json:"tracks"`
 }
+
+
+const PLAYBACK_ENDPOINT = "https://api.spotify.com/v1/me/player"
+type PlaybackState struct {
+	Device struct {
+		ID           string `json:"id"`
+		IsActive     bool   `json:"is_active"`
+		IsRestricted bool   `json:"is_restricted"`
+		Name         string `json:"name"`
+		Type         string `json:"type"`
+		VolumePercent int   `json:"volume_percent"`
+	} `json:"device"`
+	ShuffleState bool `json:"shuffle_state"`
+	RepeatState  string `json:"repeat_state"`
+	Timestamp    int64  `json:"timestamp"`
+	Context      struct {
+		ExternalUrls struct {
+			Spotify string `json:"spotify"`
+		} `json:"external_urls"`
+		Href  string `json:"href"`
+		Type  string `json:"type"`
+		URI   string `json:"uri"`
+	} `json:"context"`
+	ProgressMs int `json:"progress_ms"`
+	Item       struct {
+		Album struct {
+			AlbumType string `json:"album_type"`
+			Artists   []struct {
+				ExternalUrls struct {
+					Spotify string `json:"spotify"`
+				} `json:"external_urls"`
+				Href string `json:"href"`
+				ID   string `json:"id"`
+				Name string `json:"name"`
+				Type string `json:"type"`
+				URI  string `json:"uri"`
+			} `json:"artists"`
+			ExternalUrls struct {
+				Spotify string `json:"spotify"`
+			} `json:"external_urls"`
+			Href  string `json:"href"`
+			ID    string `json:"id"`
+			Images []struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"images"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+			URI  string `json:"uri"`
+		} `json:"album"`
+		Artists []struct {
+			ExternalUrls struct {
+				Spotify string `json:"spotify"`
+			} `json:"external_urls"`
+			Href string `json:"href"`
+			ID   string `json:"id"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+			URI  string `json:"uri"`
+		} `json:"artists"`
+		DiscNumber  int    `json:"disc_number"`
+		DurationMs  int    `json:"duration_ms"`
+		Explicit    bool   `json:"explicit"`
+		ExternalIds struct {
+			Isrc string `json:"isrc"`
+		} `json:"external_ids"`
+		ExternalUrls struct {
+			Spotify string `json:"spotify"`
+		} `json:"external_urls"`
+		Href      string `json:"href"`
+		ID        string `json:"id"`
+		Name      string `json:"name"`
+		Popularity int   `json:"popularity"`
+		PreviewURL string `json:"preview_url"`
+		TrackNumber int  `json:"track_number"`
+		Type       string `json:"type"`
+		URI        string `json:"uri"`
+	} `json:"item"`
+	IsPlaying bool `json:"is_playing"`
+}
