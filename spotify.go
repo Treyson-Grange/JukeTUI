@@ -24,7 +24,7 @@ func OpenLoginPage(clientID string) {
 	authURL := fmt.Sprintf(
 		"%s?client_id=%s&response_type=code&redirect_uri=%s&scope=%s",
 		SPOTIFY_AUTH_URL, clientID, url.QueryEscape(REDIRECT_URI),
-		url.QueryEscape("user-read-private user-read-email user-read-playback-state"),
+		url.QueryEscape("user-read-private user-read-email user-read-playback-state user-modify-playback-state"),
 	)
 	
 
@@ -159,4 +159,30 @@ func genericFetch[T any](endpoint, accessToken string) (T, error) {
 	}
 
 	return result, nil
+}
+func testPut(endpoint, accessToken, test string) error {
+	endpoint = fmt.Sprintf("%s?device_id=%s", endpoint, test)
+	req, err := http.NewRequest(http.MethodPut, endpoint, nil)
+	if err != nil {
+		fmt.Println("Error creating request", err)
+		return err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error creating request", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusForbidden {
+		return fmt.Errorf("missing required permissions")
+	}
+
+	fmt.Println(resp.StatusCode)
+
+	return nil
 }
