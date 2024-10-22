@@ -2,20 +2,22 @@
 
 ## Idea
 
--   Jukebox on your command line.
--   Spotify integration
--   playback controls.
--   Jukebox section that gives reccs or random songs?
--   Idea is loose for now, as I think about what is actually useful.
--   Slick UI
+- Jukebox on your command line.
+- Spotify integration
+- playback controls.
+- Jukebox section that gives reccs or random songs?
+- Idea is loose for now, as I think about what is actually useful.
+- Slick UI
 
 ## State of the project
 
--   This is so far just a proof of concept. I have done enough work that I can login and access user data
+- This is so far just a proof of concept. I have done enough work that I can login and access user data
+- Little update, its set up with bubble tea now, so UI and general flow of data and IO should be easier
+- There is now functionality to get playback state, display it, pause/play playback, and skip tracks.
 
 ## Connecting to Spotify's API
 
-`JukeCLI` is specifically a spotify command line interface. Therefore you need to follow these steps for JukeCLI to run.
+`JukeCLI` is specifically a spotify command line interface `. Therefore you need to follow these steps for JukeCLI to run.
 
 1. Go to the Spotify dashboard for developers
 2. You will need to "Create app" and follow the instructions there.

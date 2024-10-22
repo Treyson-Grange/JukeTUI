@@ -5,9 +5,102 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/joho/godotenv"
 )
+
+// Main.go
+// This is the main file. It is responsible for setting up the program and running it.
+// Uses bubbletea to create a simple terminal UI
+
+type Model struct {
+	state   PlaybackState
+	token   string
+	errMsg  string
+	loading bool
+}
+
+func initialModel(token string) Model {
+	return Model{
+		token:   token,
+		loading: true,
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return fetchPlaybackStateCmd(m.token)
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q":
+			return m, tea.Quit
+		case "p":
+			if m.state.IsPlaying {
+				handleGenericPut("https://api.spotify.com/v1/me/player/pause", m.token, nil)
+			} else {
+				handleGenericPut("https://api.spotify.com/v1/me/player/play", m.token, nil)
+			}
+			return m, fetchPlaybackStateCmd(m.token)
+		case "n":
+			handleGenericPost("https://api.spotify.com/v1/me/player/next", m.token, nil)
+			return m, fetchPlaybackStateCmd(m.token)
+		}
+
+	case PlaybackState:
+		m.state = msg
+		m.loading = false
+		return m, scheduleNextFetch(3 * time.Second)
+
+	case error:
+		m.errMsg = msg.Error()
+		m.loading = false
+		return m, scheduleNextFetch(3 * time.Second)
+
+	case tickMsg:
+		return m, fetchPlaybackStateCmd(m.token)
+	}
+
+	return m, nil
+}
+
+func (m Model) View() string {
+	if m.loading {
+		return "Loading playback state...\n"
+	}
+	if m.errMsg != "" {
+		return fmt.Sprintf("Error: %s\n", m.errMsg)
+	}
+	status := "Paused"
+	if m.state.IsPlaying {
+		status = "Playing"
+	}
+	return fmt.Sprintf(
+		"Track: %s\nStatus: %s\n\nPress 'p' to Play/Pause, 'n' to Skip, 'q' to Quit.",
+		m.state.Item.Name, status,
+	)
+
+}
+
+type tickMsg struct{}
+
+func scheduleNextFetch(d time.Duration) tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(d)
+		return tickMsg{}
+	}
+}
+
+func fetchPlaybackStateCmd(token string) tea.Cmd {
+	return func() tea.Msg {
+		state := handleGenericFetch[PlaybackState]("https://api.spotify.com/v1/me/player", token)
+		return state
+	}
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -20,43 +113,16 @@ func main() {
 
 	fmt.Println("Opening login page...")
 	OpenLoginPage(clientID)
-
 	code := GetCodeFromCallback()
 	token, err := GetSpotifyToken(context.Background(), clientID, clientSecret, code)
 	if err != nil {
 		log.Fatalf("Failed to get token: %v", err)
 	}
-
 	fmt.Println("Login successful! Access token retrieved.")
-	fmt.Println("Fetching recommendations...")
 
-	//POC, delete this
-	fetchRecommendations(token.AccessToken)
-
-	pbState := handleGenericFetch[PlaybackState](PLAYBACK_ENDPOINT, token.AccessToken)
-	fmt.Printf("Playback state: %+v\n", pbState.Device.ID)
-	// fmt.Println(testPut("https://api.spotify.com/v1/me/player/play", token.AccessToken, pbState.Device.ID))
-	// fmt.Println(testPut("https://api.spotify.com/v1/me/player/pause", token.AccessToken, pbState.Device.ID))
-}
-
-func handleGenericFetch[T any](endpoint string, accessToken string) T {
-	data, err := genericFetch[T](endpoint, accessToken)
-	if err != nil {
-		log.Fatalf("Failed to fetch playback state: %v", err)
+	p := tea.NewProgram(initialModel(token.AccessToken))
+	if _, err := p.Run(); err != nil {
+		log.Fatalf("Error: %v", err)
 	}
-	return data
-}
-
-// POC, delete this
-func fetchRecommendations(accessToken string) {
-	// Example: Use the Spotify API to fetch recommendations.
-	recs, err := GetRecommendations(accessToken, "pop", 5)
-	if err != nil {
-		log.Fatalf("Failed to fetch recommendations: %v", err)
-	}
-
-	fmt.Println("Recommended Tracks:")
-	for _, track := range recs.Tracks {
-		fmt.Printf("- %s by %s\n", track.Name, track.Artists[0].Name)
-	}
+	test()
 }
