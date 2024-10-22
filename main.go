@@ -41,13 +41,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "p":
 			if m.state.IsPlaying {
-				handleGenericPut("https://api.spotify.com/v1/me/player/pause", m.token, nil)
+				handleGenericPut("/me/player/pause", m.token, nil)
 			} else {
-				handleGenericPut("https://api.spotify.com/v1/me/player/play", m.token, nil)
+				handleGenericPut("/me/player/play", m.token, nil)
 			}
 			return m, fetchPlaybackStateCmd(m.token)
 		case "n":
-			handleGenericPost("https://api.spotify.com/v1/me/player/next", m.token, nil)
+			handleGenericPost("/me/player/next", m.token, nil)
 			return m, fetchPlaybackStateCmd(m.token)
 		}
 
@@ -97,7 +97,7 @@ func scheduleNextFetch(d time.Duration) tea.Cmd {
 
 func fetchPlaybackStateCmd(token string) tea.Cmd {
 	return func() tea.Msg {
-		state := handleGenericFetch[PlaybackState]("https://api.spotify.com/v1/me/player", token)
+		state := handleGenericFetch[PlaybackState]("/me/player", token, nil)
 		return state
 	}
 }

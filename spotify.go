@@ -14,10 +14,10 @@ import (
 // Should rename this file eventually.
 
 // TODO: add possibility to pass in additional query parameters like in reccomendations
-func genericFetch[T any](endpoint, accessToken string) (T, error) {
+func genericFetch[T any](endpoint, accessToken string, queryParams map[string]string) (T, error) {
 	var result T
 
-	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	req, err := http.NewRequest(http.MethodGet, createEndpoint(endpoint, queryParams), nil)
 	if err != nil {
 		return result, err
 	}

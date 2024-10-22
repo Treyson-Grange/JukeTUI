@@ -5,6 +5,8 @@ import (
 	"net/url"
 )
 
+const SPOTIFY_API = "https://api.spotify.com/v1"
+
 // SpotifyUtil.go
 // This file holds any utils that interact with the inner workings of
 // our spotify system.
@@ -12,6 +14,8 @@ import (
 // Edit endpoint with queryparams
 // TODO: Test this lol.
 func createEndpoint(endpoint string, queryParams map[string]string) string {
+	endpoint = fmt.Sprintf("%s%s", SPOTIFY_API, endpoint)
+
 	if len(queryParams) == 0 {
 		return endpoint
 	}

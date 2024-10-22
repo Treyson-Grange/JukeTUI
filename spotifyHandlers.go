@@ -8,8 +8,8 @@ import (
 // This file contains the error handling functions for Spotify API requests.
 
 // Generic fetch/get function for Spotify API requests.
-func handleGenericFetch[T any](endpoint string, accessToken string) T {
-	data, err := genericFetch[T](endpoint, accessToken)
+func handleGenericFetch[T any](endpoint, accessToken string, queryParams map[string]string) T {
+	data, err := genericFetch[T](endpoint, accessToken, queryParams)
 	if err != nil {
 		log.Fatalf("Failed to fetch data: %v", err)
 	}
