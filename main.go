@@ -58,10 +58,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, fetchPlaybackStateCmd(m.token)
 		case "c": // play reccomendation
-
-			handleGenericPut("/me/player/play", m.token, map[string]string{"uris": m.reccomendation.Tracks[0].URI}) // fixed to access the URI of the first track
+			fmt.Println(m.reccomendation.Tracks[0].URI)
+			handleGenericPut("/me/player/play", m.token, nil)
+			// we need to put a list of uri's in the BODY.
+			// Or what we can do, is add to the queue, and then skip. 
+			// So we keep whatever album/playlist is playing, and then skip to the reccomendation.
+			// Then after teh reccomenation is done, we skip back to the original album/playlist.
+			// Issues: 
+				// what if the user already has a queue? It goes to end. Issue
+			// K heres my decision for now. We will add to queue but not skip.
+			// we will tell them it was added to the queue. 
 			return m, fetchPlaybackStateCmd(m.token)
-			//TODO: Fix above.
+			
 		}
 
 	case PlaybackState:

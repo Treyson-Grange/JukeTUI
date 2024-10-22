@@ -42,10 +42,12 @@ func OpenLoginPage(clientID string) {
 
 	err := exec.Command("xdg-open", authURL).Start() // Linux
 	if err != nil {
-		fmt.Println()
 		err = exec.Command("open", authURL).Start() // macOS
 		if err != nil {
-			log.Fatalf("Failed to open login page: %v", err)
+			err = exec.Command("rundll32", "url.dll,FileProtocolHandler", authURL).Start() // Windows
+			if err != nil {
+				log.Fatalf("Failed to open login page: %v", err)
+			}
 		}
 	}
 }

@@ -2,19 +2,19 @@
 
 ## Idea
 
-- Jukebox on your command line.
-- Spotify integration
-- playback controls.
-- Jukebox section that gives reccs or random songs?
-- Idea is loose for now, as I think about what is actually useful.
-- Slick UI
+-   Jukebox on your command line.
+-   Spotify integration
+-   playback controls.
+-   Jukebox section that gives reccs or random songs?
+-   Idea is loose for now, as I think about what is actually useful.
+-   Slick UI
 
 ## State of the project
 
-- This is so far just a proof of concept. I have done enough work that I can login and access user data
-- Little update, its set up with bubble tea now, so UI and general flow of data and IO should be easier
-- There is now functionality to get playback state, display it, pause/play playback, and skip tracks.
-- Currently we are doing the same http request code, so TODO: fix that.
+-   This is so far just a proof of concept. I have done enough work that I can login and access user data
+-   Little update, its set up with bubble tea now, so UI and general flow of data and IO should be easier
+-   There is now functionality to get playback state, display it, pause/play playback, and skip tracks.
+-   Currently we are doing the same http request code, so TODO: fix that.
 
 ## Connecting to Spotify's API
 
@@ -27,3 +27,7 @@
 5. You will then have to setup a Redirect URI. This is done in the app dashboard. Click settings, Edit, and change the Redirect URIs and set it to `http://localhost:8080/callback`
 6. On run, you will be asked to grant spotify permissions.
 7. On return, you will be in the app, ready to go.
+
+## KEEP THESE IN MIND
+
+-   API key lasts for 1 hour. We need a system to get new ones.
