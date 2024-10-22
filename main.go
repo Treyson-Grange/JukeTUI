@@ -16,11 +16,14 @@ import (
 // Uses bubbletea to create a simple terminal UI
 
 type Model struct {
-	state   PlaybackState
-	token   string
-	errMsg  string
-	loading bool
+	state          PlaybackState
+	token          string
+	errMsg         string
+	loading        bool
+	reccomendation SpotifyRecommendations
 }
+
+type tickMsg struct{}
 
 func initialModel(token string) Model {
 	return Model{
@@ -49,6 +52,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "n":
 			handleGenericPost("/me/player/next", m.token, nil)
 			return m, fetchPlaybackStateCmd(m.token)
+		case "r":
+			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"})
+			m.reccomendation = data
+
+			return m, fetchPlaybackStateCmd(m.token)
+		case "c": // play reccomendation
+
+			handleGenericPut("/me/player/play", m.token, map[string]string{"uris": m.reccomendation.Tracks[0].URI}) // fixed to access the URI of the first track
+			return m, fetchPlaybackStateCmd(m.token)
+			//TODO: Fix above.
 		}
 
 	case PlaybackState:
@@ -79,14 +92,16 @@ func (m Model) View() string {
 	if m.state.IsPlaying {
 		status = "Playing"
 	}
+	if len(m.reccomendation.Tracks) > 0 {
+		return fmt.Sprintf(
+			"Reccomendations: %s %s %s ", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, m.reccomendation.Tracks[0].URI,
+		)
+	}
 	return fmt.Sprintf(
 		"Track: %s\nStatus: %s\n\nPress 'p' to Play/Pause, 'n' to Skip, 'q' to Quit.",
 		m.state.Item.Name, status,
 	)
-
 }
-
-type tickMsg struct{}
 
 func scheduleNextFetch(d time.Duration) tea.Cmd {
 	return func() tea.Msg {

@@ -14,6 +14,7 @@
 - This is so far just a proof of concept. I have done enough work that I can login and access user data
 - Little update, its set up with bubble tea now, so UI and general flow of data and IO should be easier
 - There is now functionality to get playback state, display it, pause/play playback, and skip tracks.
+- Currently we are doing the same http request code, so TODO: fix that.
 
 ## Connecting to Spotify's API
 

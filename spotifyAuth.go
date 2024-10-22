@@ -50,6 +50,7 @@ func OpenLoginPage(clientID string) {
 	}
 }
 
+// Gets the authorization code from the callback URL. Makes a script that closes the window afterwards.
 func GetCodeFromCallback() string {
 	var code string
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
@@ -79,6 +80,7 @@ func GetCodeFromCallback() string {
 	return code
 }
 
+// Given the client ID, client secret, and authorization code, returns the Spotify token response.
 func GetSpotifyToken(ctx context.Context, clientID, clientSecret, code string) (SpotifyTokenResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")

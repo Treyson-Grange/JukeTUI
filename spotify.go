@@ -13,7 +13,6 @@ import (
 // These functions are used by the handlers to fetch data from the Spotify API.
 // Should rename this file eventually.
 
-// TODO: add possibility to pass in additional query parameters like in reccomendations
 func genericFetch[T any](endpoint, accessToken string, queryParams map[string]string) (T, error) {
 	var result T
 

@@ -28,6 +28,7 @@ type SpotifyRecommendations struct {
 		Artists []struct {
 			Name string `json:"name"`
 		} `json:"artists"`
+		URI string `json:"uri"`
 	} `json:"tracks"`
 }
 

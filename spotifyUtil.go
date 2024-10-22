@@ -5,11 +5,11 @@ import (
 	"net/url"
 )
 
-const SPOTIFY_API = "https://api.spotify.com/v1"
-
 // SpotifyUtil.go
 // This file holds any utils that interact with the inner workings of
 // our spotify system.
+
+const SPOTIFY_API = "https://api.spotify.com/v1"
 
 // Edit endpoint with queryparams
 // TODO: Test this lol.
