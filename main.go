@@ -156,7 +156,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case SpotifyPlaylist:
 		m.libraryList = nil
 		for _, playlist := range msg.Items {
-			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, uri: playlist.URI})
+			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name,artist: playlist.Owner.DisplayName, uri: playlist.URI})
 		}
 
 	case error:

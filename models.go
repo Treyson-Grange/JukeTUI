@@ -131,6 +131,9 @@ type SpotifyPlaylist struct {
 	Items []struct {
 		Name string `json:"name"`
 		URI  string `json:"uri"`
+		Owner struct {
+			DisplayName string `json:"display_name"`
+		}
 	}
 }
 
