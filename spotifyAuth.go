@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -30,6 +30,8 @@ var SPOTIFY_PERMS = []string{
 	"user-read-email",
 	"user-read-playback-state",
 	"user-modify-playback-state",
+	"playlist-read-private",
+	"user-library-read",
 }
 
 // Opens the login page on the users primary browser, prompting for login.
@@ -103,7 +105,7 @@ func GetSpotifyToken(ctx context.Context, clientID, clientSecret, code string) (
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return SpotifyTokenResponse{}, err
 	}

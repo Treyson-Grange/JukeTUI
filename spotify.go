@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 // These functions are used by the handlers to fetch data from the Spotify API.
 // Should rename this file eventually.
 
-func genericFetch[T any](endpoint, accessToken string, queryParams map[string]string) (T, error) {
+func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
 	var result T
 
 	req, err := http.NewRequest(http.MethodGet, createEndpoint(endpoint, queryParams), nil)
@@ -22,6 +23,15 @@ func genericFetch[T any](endpoint, accessToken string, queryParams map[string]st
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	if bodyArgs != nil {
+		body, err := json.Marshal(bodyArgs)
+		if err != nil {
+			return result, err
+		}
+		req.Body = io.NopCloser(bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -46,12 +56,18 @@ func genericFetch[T any](endpoint, accessToken string, queryParams map[string]st
 	return result, nil
 }
 
-func genericPut(endpoint, accessToken string, queryParams map[string]string) (int, error) {
-	req, err := http.NewRequest(http.MethodPut, createEndpoint(endpoint, queryParams), nil)
+func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
+	body, err := json.Marshal(bodyArgs)
+	if err != nil {
+		return 500, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, createEndpoint(endpoint, queryParams), io.NopCloser(bytes.NewReader(body)))
 	if err != nil {
 		return 500, err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -64,12 +80,18 @@ func genericPut(endpoint, accessToken string, queryParams map[string]string) (in
 	return resp.StatusCode, nil
 }
 
-func genericPost(endpoint, accessToken string, queryParams map[string]string) (int, error) {
-	req, err := http.NewRequest(http.MethodPost, createEndpoint(endpoint, queryParams), nil)
+func genericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
+	body, err := json.Marshal(bodyArgs)
+	if err != nil {
+		return 500, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, createEndpoint(endpoint, queryParams), io.NopCloser(bytes.NewReader(body)))
 	if err != nil {
 		return 500, err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)

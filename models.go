@@ -112,3 +112,19 @@ type PlaybackState struct {
 	} `json:"item"`
 	IsPlaying bool `json:"is_playing"`
 }
+
+type SpotifyAlbum struct {
+	Items []struct {
+		Album struct {
+			Name string `json:"name"`
+			URI  string `json:"uri"`
+		}
+	}
+}
+
+type SpotifyPlaylist struct {
+	Items []struct {
+		Name string `json:"name"`
+		URI  string `json:"uri"`
+	}
+}
