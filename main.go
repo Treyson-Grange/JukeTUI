@@ -131,8 +131,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		
 		case "enter":
-			errorLogger.Println("TODO: not implemented")
-			handleGenericPost("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
+			if m.state.IsPlaying {
+				if m.listDetail == "album" {
+					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "false"}, nil)
+				} else {
+					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
+				}
+				handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
+			}
 		}
 
 	case PlaybackState:
@@ -152,7 +158,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	
 	case SpotifyPlaylist:
-		fmt.Println("Playlists")
 		m.libraryList = nil
 		for _, playlist := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, uri: playlist.URI})
@@ -212,7 +217,7 @@ func (m Model) View() string {
 		}
 	}
 
-	library := boxStyle.Width(boxWidth).Height(boxHeight).Render(libText)
+	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
 	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(recommendationDetails)
 	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render("Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )")
 
