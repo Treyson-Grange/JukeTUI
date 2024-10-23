@@ -47,16 +47,19 @@ type Model struct {
 	 * List detail, either "album" or "playlist".
 	 */
 	listDetail     string
+	/*
+	 * Cursor for the list of albums/playlists.
+	*/
+	cursor int
+	/*
+	 * List of albums/playlists.
+	 */
+	libraryList []LibraryItem
 }
 
-var (
-	boxStyle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		Padding(1).
-		Align(lipgloss.Center)
 
-	horizontalGap = lipgloss.NewStyle().Padding(0, 1)
-)
+
+
 
 type tickMsg struct{}
 
@@ -77,7 +80,10 @@ var errorLogger = func() *log.Logger {
 }()
 
 func (m Model) Init() tea.Cmd {
-	return fetchPlaybackStateCmd(m.token)
+	return tea.Batch(
+		fetchPlaybackStateCmd(m.token),
+		fetchLibrary(m.token, m.listDetail),
+	)
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -86,6 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "Q":
 			return m, tea.Quit
+
 		case "p", "P":
 			if m.state.IsPlaying {
 				handleGenericPut("/me/player/pause", m.token, nil, nil)
@@ -93,30 +100,39 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				handleGenericPut("/me/player/play", m.token, nil, map[string]string{"device_id": m.state.Device.ID})
 			}
 			return m, fetchPlaybackStateCmd(m.token)
+
 		case "n", "N":
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, fetchPlaybackStateCmd(m.token)
+
 		case "r", "R":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			return m, fetchPlaybackStateCmd(m.token)
+			
 		case "c", "C":
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
 			return m, fetchPlaybackStateCmd(m.token)
-		case "t", "T":
-			if m.listDetail == "album" {
-				test := handleGenericFetch[SpotifyAlbum]("/me/albums", m.token, map[string]string{"limit": "20"}, nil)
-				for _, album := range test.Items {
-					fmt.Println(album.Album.Name)
-				}
+
+		case "up": 
+			if m.cursor > 0 {
+				m.cursor--
 			} else {
-				test := handleGenericFetch[SpotifyPlaylist]("/me/playlists", m.token, map[string]string{"limit": "20"}, nil)
-				for _, playlist := range test.Items {
-					fmt.Println(playlist.Name)
-				}
+				m.cursor = len(m.libraryList) - 1
 			}
+
+		case "down":
+			if m.cursor < len(m.libraryList)-1 {
+				m.cursor++
+			} else {
+				m.cursor = 0
+			}
+		
+		case "enter":
+			errorLogger.Println("TODO: not implemented")
+			handleGenericPost("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
 		}
 
 	case PlaybackState:
@@ -128,6 +144,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.token = msg.AccessToken
 		m.tokenExpiresAt = time.Now().Add(time.Duration(msg.ExpiresIn) * time.Second)
 		return m, nil
+
+	case SpotifyAlbum:
+		m.libraryList = nil
+		for _, album := range msg.Items {
+			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, uri: album.Album.URI})
+		}
+	
+	case SpotifyPlaylist:
+		fmt.Println("Playlists")
+		m.libraryList = nil
+		for _, playlist := range msg.Items {
+			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, uri: playlist.URI})
+		}
 
 	case error:
 		m.errMsg = msg.Error()
@@ -170,7 +199,20 @@ func (m Model) View() string {
 		)
 	}
 
-	library := boxStyle.Width(boxWidth).Height(boxHeight).Render(fmt.Sprintf(""))
+	libText := ""
+	if m.libraryList != nil {
+		for i, item := range m.libraryList {
+			if i == m.cursor {
+				item = LibraryItem{
+					name: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render(item.name),
+					uri:  item.uri,
+				}
+			}
+			libText += item.name + "\n"
+		}
+	}
+
+	library := boxStyle.Width(boxWidth).Height(boxHeight).Render(libText)
 	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(recommendationDetails)
 	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render("Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )")
 
@@ -194,6 +236,18 @@ func fetchPlaybackStateCmd(token string) tea.Cmd {
 	return func() tea.Msg {
 		state := handleGenericFetch[PlaybackState]("/me/player", token, nil, nil)
 		return state
+	}
+}
+
+func fetchLibrary(token string, listDetail string) tea.Cmd {
+	return func() tea.Msg {
+		if listDetail == "album" {
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": "20"}, nil)
+			return albums
+		} else {
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "20"}, nil)
+			return playlist
+		}
 	}
 }
 

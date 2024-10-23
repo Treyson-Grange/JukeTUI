@@ -130,3 +130,8 @@ type SpotifyPlaylist struct {
 		URI  string `json:"uri"`
 	}
 }
+
+type LibraryItem struct {
+	name string
+	uri  string
+}
