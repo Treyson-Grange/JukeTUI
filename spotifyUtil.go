@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"time"
 )
 
 // SpotifyUtil.go
@@ -11,7 +12,6 @@ import (
 
 const SPOTIFY_API = "https://api.spotify.com/v1"
 
-// Edit endpoint with queryparams
 // TODO: Test this lol.
 func createEndpoint(endpoint string, queryParams map[string]string) string {
 	endpoint = fmt.Sprintf("%s%s", SPOTIFY_API, endpoint)
@@ -26,4 +26,9 @@ func createEndpoint(endpoint string, queryParams map[string]string) string {
 	}
 
 	return fmt.Sprintf("%s?%s", endpoint, query.Encode())
+}
+
+// Check if the token is expired
+func (s *SpotifyTokenResponse) IsExpired() bool {
+    return time.Now().After(time.Now().Add(time.Duration(s.ExpiresIn) * time.Second))
 }

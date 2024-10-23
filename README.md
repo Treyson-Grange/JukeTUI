@@ -60,5 +60,6 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
     -   [ ] This will run on start, so we can have a homescreen
 
 -   [ ] API key lasts for 1 hour. We need a system to get new ones.
+    -   [x] Base functionality
     -   [ ] Testing: If we lock our computer but come back before it ends, will it still correctly refresh at the right time?
     -   [ ] Testing: What if we don't come back?

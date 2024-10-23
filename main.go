@@ -11,16 +11,39 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Main.go
-// This is the main file. It is responsible for setting up the program and running it.
-// Uses bubbletea to create a simple terminal UI
-
 type Model struct {
+	/*
+	 * Playback state, including track info, playback status, etc.
+	 * For specifics, see PlaybackState struct in models.go
+	 */
 	state          PlaybackState
+	/*
+	 * Spotify web API access token. Lasts for 1 hour.
+	 */
 	token          string
+	/*
+	 * Spotify web API refresh token. Used to get a new access token when the current one is close to expiration.
+	 */
+	refreshToken   string
+	/*
+	 * Time when the current access token expires.
+	 */
+	tokenExpiresAt time.Time
+	/*
+	 * Error message, if any
+	 */
 	errMsg         string
+	/*
+	 * Whether or not we're currently fetching access token initially
+	 */
 	loading        bool
+	/*
+	 * Current recommendation, if any.
+	 */
 	reccomendation SpotifyRecommendations
+	/*
+	 * List detail, either "album" or "playlist".
+	 */
 	listDetail     string
 }
 
@@ -34,17 +57,18 @@ func initialModel(token, listDetail string) Model {
 	}
 }
 
-func (m Model) Init() tea.Cmd {
-	return fetchPlaybackStateCmd(m.token)
-}
-
-var errorLogger = func() *log.Logger { //IDK where to put this
+// Error logging setup
+var errorLogger = func() *log.Logger {
 	file, err := os.OpenFile("errors.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
 	return log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 }()
+
+func (m Model) Init() tea.Cmd {
+	return fetchPlaybackStateCmd(m.token)
+}
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -65,14 +89,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "r":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
-
 			return m, fetchPlaybackStateCmd(m.token)
-		case "c": // add to queuer
-			handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
+		case "c":
+			if len(m.reccomendation.Tracks) > 0 {
+				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
+			}
 			return m, fetchPlaybackStateCmd(m.token)
-
-		case "t": // General Test command
-
+		case "t":
 			if m.listDetail == "album" {
 				test := handleGenericFetch[SpotifyAlbum]("/me/albums", m.token, map[string]string{"limit": "20"}, nil)
 				for _, album := range test.Items {
@@ -84,13 +107,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					fmt.Println(playlist.Name)
 				}
 			}
-
 		}
 
 	case PlaybackState:
 		m.state = msg
 		m.loading = false
-		return m, scheduleNextFetch(3 * time.Second)
+		return m, tea.Batch(scheduleNextFetch(3*time.Second), CheckTokenExpiryCmd(m))
+
+	case SpotifyTokenResponse:
+		m.token = msg.AccessToken
+		m.tokenExpiresAt = time.Now().Add(time.Duration(msg.ExpiresIn) * time.Second)
+		return m, nil
 
 	case error:
 		m.errMsg = msg.Error()
@@ -124,11 +151,12 @@ func (m Model) View() string {
 	}
 
 	return fmt.Sprintf(
-		"Track: %s\nStatus: %s\n%s\nPress 'p' to Play/Pause, 'n' to Skip, 'q' to Quit, 'r' to get recommendations, 'c' to add recc to queue\n",
+		"Track: %s\nStatus: %s\n%s\nPress 'p' to Play/Pause, 'n' to Skip, 'q' to Quit, 'r' to get recommendations, 'c' to add recommendation to queue\n",
 		m.state.Item.Name, status, recommendationDetails,
 	)
 }
 
+// Schedule the next fetch of the playback state.
 func scheduleNextFetch(d time.Duration) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(d)
@@ -136,6 +164,7 @@ func scheduleNextFetch(d time.Duration) tea.Cmd {
 	}
 }
 
+// Fetch the playback state.
 func fetchPlaybackStateCmd(token string) tea.Cmd {
 	return func() tea.Msg {
 		state := handleGenericFetch[PlaybackState]("/me/player", token, nil, nil)
@@ -162,7 +191,11 @@ func main() {
 	}
 	fmt.Println("Login successful! Access token retrieved.")
 
-	p := tea.NewProgram(initialModel(token.AccessToken, listDetail))
+	model := initialModel(token.AccessToken, listDetail)
+	model.refreshToken = token.RefreshToken
+	model.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
+
+	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
