@@ -1,20 +1,17 @@
 # JukeCLI
 
-## Idea
-
-- Jukebox on your command line.
-- Spotify integration
-- playback controls.
-- Jukebox section that gives reccs or random songs?
-- Idea is loose for now, as I think about what is actually useful.
-- Slick UI
-
 ## State of the project
 
 - This is so far just a proof of concept. I have done enough work that I can login and access user data
 - Little update, its set up with bubble tea now, so UI and general flow of data and IO should be easier
 - There is now functionality to get playback state, display it, pause/play playback, and skip tracks.
-- Currently we are doing the same http request code, so TODO: fix that.
+- There is now functioanlity to get reccs, and play said reccs.
+- There is now functionality to HORRIBLY display albums or playlists
+- There is now functionality to specify if you want albums or playlists, via env.
+
+# Setup
+
+JukeCLI requires the use of Spotify's API, and you will have to create your own "spotify app" on the Spotify dashboard for developers. This process isn't that bad. Details are discussed below
 
 ## Connecting to Spotify's API
 
@@ -28,11 +25,22 @@
 6. On run, you will be asked to grant spotify permissions.
 7. On return, you will be in the app, ready to go.
 
-## KEEP THESE IN MIND
+## Setup your environment
 
-- API key lasts for 1 hour. We need a system to get new ones.
+### .env
 
-## TODO
+- To set up your `.env`, copy `.env.example` into `.env`.
+
+```
+SPOTIFY_ID={{ From the developer dashboard }}
+SPOTIFY_SECRET={{ From the developer dashboard }}
+SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
+```
+
+- Spotify Preference will alter what is displayed in the cursor section. Your saved albums or your saved playlists.
+  - (This feature might turn into 'tabs' eventually, so we can have both)
+
+# TODO
 
 - [ ] General UI
 - [ ] Better and more generic function calls
@@ -52,3 +60,4 @@
   - [x] Add new env variable to both env and example
   - [ ] Read in env, and in the T case (for testing for now) we will do different things based on it.
   - [ ] This will run on start, so we can have a homescreen
+- [ ] API key lasts for 1 hour. We need a system to get new ones.
