@@ -217,9 +217,16 @@ func (m Model) View() string {
 		}
 	}
 
+	var asdf string 
+	if(m.state.Item.Artists != nil) {
+		asdf = "Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )"
+	} else {
+		asdf = "No Playback Data. Please start a playback session on your phone or computer."
+	}
+
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
 	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(recommendationDetails)
-	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render("Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )")
+	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render(asdf)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
@@ -247,10 +254,10 @@ func fetchPlaybackStateCmd(token string) tea.Cmd {
 func fetchLibrary(token string, listDetail string) tea.Cmd {
 	return func() tea.Msg {
 		if listDetail == "album" {
-			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": "20"}, nil)
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": "50"}, nil)
 			return albums
 		} else {
-			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "20"}, nil)
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "50"}, nil)
 			return playlist
 		}
 	}
