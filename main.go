@@ -57,10 +57,6 @@ type Model struct {
 	libraryList []LibraryItem
 }
 
-
-
-
-
 type tickMsg struct{}
 
 func initialModel(token, listDetail string) Model {
@@ -154,7 +150,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case SpotifyAlbum:
 		m.libraryList = nil
 		for _, album := range msg.Items {
-			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, uri: album.Album.URI})
+			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, artist: album.Album.Artists[0].Name, uri: album.Album.URI})
 		}
 	
 	case SpotifyPlaylist:
@@ -206,14 +202,22 @@ func (m Model) View() string {
 
 	libText := ""
 	if m.libraryList != nil {
+		const CHARACTERS = 6// Amount of characters we have to account for when truncating
 		for i, item := range m.libraryList {
 			if i == m.cursor {
 				item = LibraryItem{
-					name: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render(item.name),
+					name: "> " + lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render(truncate(item.name, boxWidth - len(item.artist) - CHARACTERS)),
+					artist: item.artist,
+					uri:  item.uri,
+				}
+			} else {
+				item = LibraryItem{
+					name: "  " + truncate(item.name, boxWidth - len(item.artist) - CHARACTERS),
+					artist: item.artist,
 					uri:  item.uri,
 				}
 			}
-			libText += item.name + "\n"
+			libText += item.name + " - " + item.artist + "\n"
 		}
 	}
 

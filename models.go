@@ -120,6 +120,9 @@ type SpotifyAlbum struct {
 		Album struct {
 			Name string `json:"name"`
 			URI  string `json:"uri"`
+			Artists []struct {
+				Name string `json:"name"`
+			}
 		}
 	}
 }
@@ -133,5 +136,6 @@ type SpotifyPlaylist struct {
 
 type LibraryItem struct {
 	name string
+	artist string
 	uri  string
 }
