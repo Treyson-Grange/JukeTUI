@@ -56,3 +56,7 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
   - [x] Base functionality
   - [ ] Testing: If we lock our computer but come back before it ends, will it still correctly refresh at the right time?
   - [ ] Testing: What if we don't come back?
+
+## Known Issues
+
+- [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
