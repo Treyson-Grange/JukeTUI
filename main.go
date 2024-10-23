@@ -80,7 +80,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.IsPlaying {
 				handleGenericPut("/me/player/pause", m.token, nil, nil)
 			} else {
-				handleGenericPut("/me/player/play", m.token, nil, nil)
+				handleGenericPut("/me/player/play", m.token, nil, map[string]string{"device_id": m.state.Device.ID})
 			}
 			return m, fetchPlaybackStateCmd(m.token)
 		case "n":
