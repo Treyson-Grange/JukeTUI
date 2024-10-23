@@ -72,7 +72,10 @@ func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]s
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return resp.StatusCode, err
+		if resp != nil { 
+			return resp.StatusCode, err
+		}
+		return 500, err
 	}
 
 	defer resp.Body.Close()
@@ -96,7 +99,10 @@ func genericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return resp.StatusCode, err
+		if resp != nil {
+			return resp.StatusCode, err
+		}
+		return 500, err
 	}
 
 	defer resp.Body.Close()
