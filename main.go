@@ -8,7 +8,9 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/joho/godotenv"
+	"golang.org/x/term"
 )
 
 type Model struct {
@@ -47,6 +49,15 @@ type Model struct {
 	listDetail     string
 }
 
+var (
+	boxStyle = lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		Padding(1).
+		Align(lipgloss.Center)
+
+	horizontalGap = lipgloss.NewStyle().Padding(0, 1)
+)
+
 type tickMsg struct{}
 
 func initialModel(token, listDetail string) Model {
@@ -57,7 +68,6 @@ func initialModel(token, listDetail string) Model {
 	}
 }
 
-// Error logging setup
 var errorLogger = func() *log.Logger {
 	file, err := os.OpenFile("errors.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
@@ -74,28 +84,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q":
+		case "q", "Q":
 			return m, tea.Quit
-		case "p":
+		case "p", "P":
 			if m.state.IsPlaying {
 				handleGenericPut("/me/player/pause", m.token, nil, nil)
 			} else {
 				handleGenericPut("/me/player/play", m.token, nil, map[string]string{"device_id": m.state.Device.ID})
 			}
 			return m, fetchPlaybackStateCmd(m.token)
-		case "n":
+		case "n", "N":
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, fetchPlaybackStateCmd(m.token)
-		case "r":
+		case "r", "R":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			return m, fetchPlaybackStateCmd(m.token)
-		case "c":
+		case "c", "C":
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
 			return m, fetchPlaybackStateCmd(m.token)
-		case "t":
+		case "t", "T":
 			if m.listDetail == "album" {
 				test := handleGenericFetch[SpotifyAlbum]("/me/albums", m.token, map[string]string{"limit": "20"}, nil)
 				for _, album := range test.Items {
@@ -132,15 +142,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+	width, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		log.Fatalf("Failed to get terminal size: %v", err)
+	}
+	boxWidth := width / 2 - 2
+	boxHeight := height - 10
+	playBackHeight := 1
+	playBackWidth := width - 2
+
 	if m.loading {
 		return "Loading playback state...\n"
 	}
 	if m.errMsg != "" {
 		return fmt.Sprintf("Error: %s\n", m.errMsg)
 	}
-	status := "Paused"
+
+	status := "▶"
 	if m.state.IsPlaying {
-		status = "Playing"
+		status = "◼"
 	}
 
 	var recommendationDetails string
@@ -150,9 +170,14 @@ func (m Model) View() string {
 		)
 	}
 
-	return fmt.Sprintf(
-		"Track: %s\nStatus: %s\n%s\nPress 'p' to Play/Pause, 'n' to Skip, 'q' to Quit, 'r' to get recommendations, 'c' to add recommendation to queue\n",
-		m.state.Item.Name, status, recommendationDetails,
+	library := boxStyle.Width(boxWidth).Height(boxHeight).Render(fmt.Sprintf(""))
+	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(recommendationDetails)
+	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render("Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )")
+
+	return lipgloss.JoinVertical(
+		lipgloss.Left,
+		lipgloss.JoinHorizontal(lipgloss.Top, library, jukebox),
+		playbackBar,
 	)
 }
 
@@ -190,6 +215,7 @@ func main() {
 		log.Fatalf("Failed to get token: %v", err)
 	}
 	fmt.Println("Login successful! Access token retrieved.")
+	fmt.Println("Press 'p' to Play/Pause, 'n' to Skip, 'q' to Quit, 'r' to get recommendations, 'c' to add recommendation to queue")
 
 	model := initialModel(token.AccessToken, listDetail)
 	model.refreshToken = token.RefreshToken
