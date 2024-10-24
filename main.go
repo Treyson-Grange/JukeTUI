@@ -158,15 +158,16 @@ func (m Model) View() string {
 		return fmt.Sprintf("Error: %s\n", m.errMsg)
 	}
 
-	status := "▶"
+	status := "▶ "
 	if m.state.IsPlaying {
-		status = "◼"
+		status = "▮▮"
 	}
 
-	var recommendationDetails string
+	recommendationDetails := "Press 'r' to get a recommendation!\n"
+
 	if len(m.reccomendation.Tracks) > 0 {
-		recommendationDetails = fmt.Sprintf(
-			"Recommendations: %s - %s\n", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name,
+		recommendationDetails += fmt.Sprintf(
+			"Recommendation: %s - %s\n 'c' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name,
 		)
 	}
 
@@ -191,7 +192,7 @@ func (m Model) View() string {
 
 	var playback string
 	if m.state.Item.Artists != nil {
-		playback = "Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + "  " + status + "  " + msToMinSec(m.progressMs) + "/" + msToMinSec(m.state.Item.DurationMs)
+		playback = "🎵 [ " + m.state.Item.Name + " | " + m.state.Item.Artists[0].Name + " ]  " + lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status) + "  [ " + msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs) + " ]"
 	} else {
 		playback = "No Playback Data. Please start a playback session on your device"
 	}
@@ -240,7 +241,7 @@ func main() {
 		log.Fatalf("Failed to get token: %v", err)
 	}
 	fmt.Println("Login successful! Access token retrieved.")
-	fmt.Println("Press 'p' to Play/Pause, 'n' to Skip, 'q' to Quit, 'r' to get recommendations, 'c' to add recommendation to queue")
+	fmt.Println("Press 'p' to Play/Pause, 'n' to Skip, 'q' to Quit")
 
 	model := initialModel(token.AccessToken, listDetail)
 	model.refreshToken = token.RefreshToken

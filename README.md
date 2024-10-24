@@ -82,13 +82,14 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - [x] Documentation (bare bones)
 - [x] Library
   - [x] Still in env, no tabs yet
-- [ ] PlaybackBar
+- [x] PlaybackBar
   - [x] Title/Artist
   - [x] Paused or playing
   - [x] Track progress
-  - [ ] Make it prettier
+  - [x] Make it prettier
 - [ ] Juke
   - [ ] Animation (really just fill the space)
+  - [x] Instructions (r to get recc, c to add recc to queue)
 
 ## Known Issues
 
