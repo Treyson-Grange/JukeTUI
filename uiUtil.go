@@ -6,14 +6,13 @@ import (
 
 var (
 	boxStyle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		Padding(1).
-		Align(lipgloss.Center)
+			Border(lipgloss.NormalBorder()).
+			Padding(1).
+			Align(lipgloss.Center)
 
-	horizontalGap = lipgloss.NewStyle().Padding(0, 1)
 	libraryStyle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder()).
-		Padding(0).Align(lipgloss.Left)
+			Border(lipgloss.NormalBorder()).
+			Padding(0).Align(lipgloss.Left)
 )
 
 // Truncate a string to fit any width

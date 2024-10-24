@@ -17,12 +17,11 @@ type SpotifyUser struct {
 }
 
 type SpotifyTokenResponse struct {
-    AccessToken  string `json:"access_token"`
-    TokenType    string `json:"token_type"`
-    ExpiresIn    int    `json:"expires_in"`
-    RefreshToken string `json:"refresh_token,omitempty"`
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
-
 
 type SpotifyRecommendations struct {
 	Tracks []struct {
@@ -118,8 +117,8 @@ type PlaybackState struct {
 type SpotifyAlbum struct {
 	Items []struct {
 		Album struct {
-			Name string `json:"name"`
-			URI  string `json:"uri"`
+			Name    string `json:"name"`
+			URI     string `json:"uri"`
 			Artists []struct {
 				Name string `json:"name"`
 			}
@@ -129,8 +128,8 @@ type SpotifyAlbum struct {
 
 type SpotifyPlaylist struct {
 	Items []struct {
-		Name string `json:"name"`
-		URI  string `json:"uri"`
+		Name  string `json:"name"`
+		URI   string `json:"uri"`
 		Owner struct {
 			DisplayName string `json:"display_name"`
 		}
@@ -138,7 +137,7 @@ type SpotifyPlaylist struct {
 }
 
 type LibraryItem struct {
-	name string
+	name   string
 	artist string
-	uri  string
+	uri    string
 }

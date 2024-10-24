@@ -30,5 +30,5 @@ func createEndpoint(endpoint string, queryParams map[string]string) string {
 
 // Check if the token is expired
 func (s *SpotifyTokenResponse) IsExpired() bool {
-    return time.Now().After(time.Now().Add(time.Duration(s.ExpiresIn) * time.Second))
+	return time.Now().After(time.Now().Add(time.Duration(s.ExpiresIn) * time.Second))
 }

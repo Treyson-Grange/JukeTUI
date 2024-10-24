@@ -18,15 +18,15 @@ type Model struct {
 	 * Playback state, including track info, playback status, etc.
 	 * For specifics, see PlaybackState struct in models.go
 	 */
-	state          PlaybackState
+	state PlaybackState
 	/*
 	 * Spotify web API access token. Lasts for 1 hour.
 	 */
-	token          string
+	token string
 	/*
 	 * Spotify web API refresh token. Used to get a new access token when the current one is close to expiration.
 	 */
-	refreshToken   string
+	refreshToken string
 	/*
 	 * Time when the current access token expires.
 	 */
@@ -34,11 +34,11 @@ type Model struct {
 	/*
 	 * Error message, if any
 	 */
-	errMsg         string
+	errMsg string
 	/*
 	 * Whether or not we're currently fetching access token initially
 	 */
-	loading        bool
+	loading bool
 	/*
 	 * Current recommendation, if any.
 	 */
@@ -46,15 +46,19 @@ type Model struct {
 	/*
 	 * List detail, either "album" or "playlist".
 	 */
-	listDetail     string
+	listDetail string
 	/*
 	 * Cursor for the list of albums/playlists.
-	*/
+	 */
 	cursor int
 	/*
 	 * List of albums/playlists.
 	 */
 	libraryList []LibraryItem
+	/*
+	 * Height of the list of albums/playlists.
+	 */
+	height int
 }
 
 type tickMsg struct{}
@@ -64,6 +68,7 @@ func initialModel(token, listDetail string) Model {
 		token:      token,
 		loading:    true,
 		listDetail: listDetail,
+		height:     10,
 	}
 }
 
@@ -76,9 +81,13 @@ var errorLogger = func() *log.Logger {
 }()
 
 func (m Model) Init() tea.Cmd {
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		log.Fatalf("Failed to get terminal size: %v", err)
+	}
 	return tea.Batch(
 		fetchPlaybackStateCmd(m.token),
-		fetchLibrary(m.token, m.listDetail),
+		fetchLibrary(m.token, m.listDetail, height-11),
 	)
 }
 
@@ -105,14 +114,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			return m, fetchPlaybackStateCmd(m.token)
-			
+
 		case "c", "C":
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
 			return m, fetchPlaybackStateCmd(m.token)
 
-		case "up": 
+		case "up":
 			if m.cursor > 0 {
 				m.cursor--
 			} else {
@@ -125,7 +134,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
-		
+
 		case "enter":
 			if m.state.IsPlaying {
 				if m.listDetail == "album" {
@@ -152,11 +161,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for _, album := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, artist: album.Album.Artists[0].Name, uri: album.Album.URI})
 		}
-	
+
 	case SpotifyPlaylist:
 		m.libraryList = nil
 		for _, playlist := range msg.Items {
-			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name,artist: playlist.Owner.DisplayName, uri: playlist.URI})
+			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, artist: playlist.Owner.DisplayName, uri: playlist.URI})
 		}
 
 	case error:
@@ -176,7 +185,7 @@ func (m Model) View() string {
 	if err != nil {
 		log.Fatalf("Failed to get terminal size: %v", err)
 	}
-	boxWidth := width / 2 - 2
+	boxWidth := width/2 - 2
 	boxHeight := height - 10
 	playBackHeight := 1
 	playBackWidth := width - 2
@@ -202,27 +211,27 @@ func (m Model) View() string {
 
 	libText := ""
 	if m.libraryList != nil {
-		const CHARACTERS = 6// Amount of characters we have to account for when truncating
+		const CHARACTERS = 6 // Amount of characters we have to account for when truncating
 		for i, item := range m.libraryList {
 			if i == m.cursor {
 				item = LibraryItem{
-					name: "> " + lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render(truncate(item.name, boxWidth - len(item.artist) - CHARACTERS)),
+					name:   "> " + lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render(truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist: item.artist,
-					uri:  item.uri,
+					uri:    item.uri,
 				}
 			} else {
 				item = LibraryItem{
-					name: "  " + truncate(item.name, boxWidth - len(item.artist) - CHARACTERS),
+					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
 					artist: item.artist,
-					uri:  item.uri,
+					uri:    item.uri,
 				}
 			}
 			libText += item.name + " - " + item.artist + "\n"
 		}
 	}
 
-	var asdf string 
-	if(m.state.Item.Artists != nil) {
+	var asdf string
+	if m.state.Item.Artists != nil {
 		asdf = "Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + " (" + status + " )"
 	} else {
 		asdf = "No Playback Data. Please start a playback session on your phone or computer."
@@ -255,13 +264,13 @@ func fetchPlaybackStateCmd(token string) tea.Cmd {
 	}
 }
 
-func fetchLibrary(token string, listDetail string) tea.Cmd {
+func fetchLibrary(token string, listDetail string, height int) tea.Cmd {
 	return func() tea.Msg {
 		if listDetail == "album" {
-			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": "50"}, nil)
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
 			return albums
 		} else {
-			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "50"}, nil)
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
 			return playlist
 		}
 	}

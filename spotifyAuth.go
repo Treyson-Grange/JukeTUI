@@ -89,38 +89,37 @@ func GetCodeFromCallback() string {
 
 // Given the client ID, client secret, and authorization code, returns the Spotify token response.
 func GetSpotifyToken(ctx context.Context, clientID, clientSecret, code string) (SpotifyTokenResponse, error) {
-    data := url.Values{}
-    data.Set("grant_type", "authorization_code")
-    data.Set("code", code)
-    data.Set("redirect_uri", REDIRECT_URI)
+	data := url.Values{}
+	data.Set("grant_type", "authorization_code")
+	data.Set("code", code)
+	data.Set("redirect_uri", REDIRECT_URI)
 
-    req, err := http.NewRequestWithContext(ctx, http.MethodPost, SPOTIFY_TOKEN_URL, strings.NewReader(data.Encode()))
-    if err != nil {
-        return SpotifyTokenResponse{}, err
-    }
-    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-    req.SetBasicAuth(clientID, clientSecret)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, SPOTIFY_TOKEN_URL, strings.NewReader(data.Encode()))
+	if err != nil {
+		return SpotifyTokenResponse{}, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth(clientID, clientSecret)
 
-    client := &http.Client{Timeout: 10 * time.Second}
-    resp, err := client.Do(req)
-    if err != nil {
-        return SpotifyTokenResponse{}, err
-    }
-    defer resp.Body.Close()
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return SpotifyTokenResponse{}, err
+	}
+	defer resp.Body.Close()
 
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        return SpotifyTokenResponse{}, err
-    }
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return SpotifyTokenResponse{}, err
+	}
 
-    var tokenResp SpotifyTokenResponse
-    if err := json.Unmarshal(body, &tokenResp); err != nil {
-        return SpotifyTokenResponse{}, err
-    }
+	var tokenResp SpotifyTokenResponse
+	if err := json.Unmarshal(body, &tokenResp); err != nil {
+		return SpotifyTokenResponse{}, err
+	}
 
-    return tokenResp, nil
+	return tokenResp, nil
 }
-
 
 // refreshSpotifyTokenCmd returns a command that refreshes the Spotify token.
 func refreshSpotifyTokenCmd(refreshToken, clientID, clientSecret string) tea.Cmd {
@@ -135,33 +134,32 @@ func refreshSpotifyTokenCmd(refreshToken, clientID, clientSecret string) tea.Cmd
 
 // RefreshSpotifyToken refreshes the Spotify token using the refresh token.
 func RefreshSpotifyToken(refreshToken, clientID, clientSecret string) (SpotifyTokenResponse, error) {
-    reqBody := url.Values{
-        "grant_type":    {"refresh_token"},
-        "refresh_token": {refreshToken},
-    }.Encode()
+	reqBody := url.Values{
+		"grant_type":    {"refresh_token"},
+		"refresh_token": {refreshToken},
+	}.Encode()
 
-    req, _ := http.NewRequest("POST", SPOTIFY_TOKEN_URL, strings.NewReader(reqBody))
-    req.SetBasicAuth(clientID, clientSecret)
-    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req, _ := http.NewRequest("POST", SPOTIFY_TOKEN_URL, strings.NewReader(reqBody))
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-    resp, err := http.DefaultClient.Do(req)
-    if err != nil {
-        return SpotifyTokenResponse{}, err
-    }
-    defer resp.Body.Close()
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return SpotifyTokenResponse{}, err
+	}
+	defer resp.Body.Close()
 
-    var tokenRes SpotifyTokenResponse
-    if err := json.NewDecoder(resp.Body).Decode(&tokenRes); err != nil {
-        return SpotifyTokenResponse{}, err
-    }
-    return tokenRes, nil
+	var tokenRes SpotifyTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenRes); err != nil {
+		return SpotifyTokenResponse{}, err
+	}
+	return tokenRes, nil
 }
 
 // CheckTokenExpiryCmd refreshes the token if it has expired.
 func CheckTokenExpiryCmd(m Model) tea.Cmd {
-    if time.Now().After(m.tokenExpiresAt) {
-        return refreshSpotifyTokenCmd(m.refreshToken, os.Getenv("SPOTIFY_ID"), os.Getenv("SPOTIFY_SECRET"))
-    }
-    return nil
+	if time.Now().After(m.tokenExpiresAt) {
+		return refreshSpotifyTokenCmd(m.refreshToken, os.Getenv("SPOTIFY_ID"), os.Getenv("SPOTIFY_SECRET"))
+	}
+	return nil
 }
-

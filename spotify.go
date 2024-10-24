@@ -72,7 +72,7 @@ func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]s
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		if resp != nil { 
+		if resp != nil {
 			return resp.StatusCode, err
 		}
 		return 500, err
