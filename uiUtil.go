@@ -38,4 +38,53 @@ func msToMinSec(ms int) string {
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
 
+// Horrid ASCII art of a jukebox based on the screen size.
+func GetAsciiJuke(boxWidth, boxHeight int) string {
+	var space int
+	var vertSpace int
+	var recommendationDetails string
+	if boxWidth < 50 {
+		recommendationDetails = "Press 'r' to get a recommendation!\n\n\n" + `
+
+             @@@@@@@@@             
+          @@           @@          
+       :@                 @-       
+`
+		space = 17
+		vertSpace = boxHeight / 4
+	} else {
+		recommendationDetails = `Press 'r' to get a recommendation!\n\n\n
+                                             
+                            +@@@@@@@@@@@@@@@@@@=                            
+                        @@@@@%                %@@@@@                        
+                     @@@@=                        -@@@@                     
+                   @@@#                              *@@@                   
+                 @@@                                    @@@                 
+               @@@                                        @@@               
+              @@#                                          *@@      	     
+`
+		space = 47
+		vertSpace = boxHeight / 2
+	}
+
+	for i := 0; i < vertSpace; i++ {
+		recommendationDetails += "@"
+		for j := 0; j < space; j++ {
+			if j%10 == 0 {
+				recommendationDetails += "@"
+			} else {
+				recommendationDetails += " "
+			}
+		}
+		recommendationDetails += "@\n"
+	}
+
+	for i := 0; i < space+2; i++ {
+		recommendationDetails += "@"
+	}
+	recommendationDetails += "\n"
+
+	return recommendationDetails
+}
+
 const SPOTIFY_GREEN = "#1DB954"

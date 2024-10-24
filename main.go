@@ -90,13 +90,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "enter":
 			if m.state.IsPlaying {
-				if m.listDetail == "album" {
-					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "false"}, nil)
-				} else {
-					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
+				if m.libraryList != nil {
+					if m.listDetail == "album" {
+						handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "false"}, nil)
+					} else {
+						handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
+					}
+					handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
+					return m, handleFetchPlayback(m.token)
 				}
-				handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
-				return m, handleFetchPlayback(m.token)
 			}
 		}
 
@@ -163,7 +165,7 @@ func (m Model) View() string {
 		status = "▮▮"
 	}
 
-	recommendationDetails := "Press 'r' to get a recommendation!\n"
+	recommendationDetails := GetAsciiJuke(boxWidth, boxHeight)
 
 	if len(m.reccomendation.Tracks) > 0 {
 		recommendationDetails += fmt.Sprintf(
