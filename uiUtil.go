@@ -39,11 +39,16 @@ func msToMinSec(ms int) string {
 }
 
 // Horrid ASCII art of a jukebox based on the screen size.
-func GetAsciiJuke(boxWidth, boxHeight int) string {
+func GetAsciiJuke(boxWidth, boxHeight int, displayJuke bool) string {
 	var space int
 	var vertSpace int
 	var recommendationDetails string
-	if boxWidth < 50 {
+
+	if !displayJuke {
+		return "Press 'r' to get a recommendation!\n\n\n"
+	}
+
+	if boxWidth < 60 {
 		recommendationDetails = "Press 'r' to get a recommendation!\n\n\n" + `
 
              @@@@@@@@@             

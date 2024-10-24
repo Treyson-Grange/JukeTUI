@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -97,6 +98,8 @@ func handleFetchPlayback(token string) tea.Cmd {
 // - The fetched library.
 func handleFetchLibrary(token string, listDetail string, height int) tea.Cmd {
 	return func() tea.Msg {
+		// Spotify limit is 50
+		height = int(math.Min(float64(height), 50))
 		if listDetail == "album" {
 			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
 			return albums
@@ -106,3 +109,4 @@ func handleFetchLibrary(token string, listDetail string, height int) tea.Cmd {
 		}
 	}
 }
+

@@ -165,7 +165,7 @@ func (m Model) View() string {
 		status = "▮▮"
 	}
 
-	recommendationDetails := GetAsciiJuke(boxWidth, boxHeight)
+	recommendationDetails := GetAsciiJuke(boxWidth, boxHeight, false)
 
 	if len(m.reccomendation.Tracks) > 0 {
 		recommendationDetails += fmt.Sprintf(
