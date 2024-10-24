@@ -181,14 +181,17 @@ func (m Model) View() string {
 				item = LibraryItem{
 					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist: item.artist,
+					uri:   item.uri,
 				}
 			} else {
 				item = LibraryItem{
 					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
 					artist: item.artist,
+					uri:   item.uri,
 				}
-			}
-			libText += item.name + " - " + item.artist + "\n"
+			} 
+			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
+			libText += fmt.Sprintf("%s - %s%s\n", item.name, item.artist, play)
 		}
 	}
 
