@@ -46,6 +46,9 @@ type Model struct {
 
 	//Progress of current track in ms
 	progressMs int
+	
+	// Album cover image as string
+	image string
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -83,6 +86,11 @@ type SpotifyRecommendations struct {
 			Name string `json:"name"`
 		} `json:"artists"`
 		URI string `json:"uri"`
+		Album struct {
+			Image []struct {
+				URL string `json:"url"`
+			} `json:"images"`
+		} `json:"album"`
 	} `json:"tracks"`
 }
 
@@ -196,4 +204,5 @@ type LibraryItem struct {
 	name   string
 	artist string
 	uri    string
+	imageURL string
 }

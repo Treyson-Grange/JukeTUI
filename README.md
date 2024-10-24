@@ -47,10 +47,9 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - [x] Better and more generic function calls
 - [x] Reccomendations system (get/add to queue)
 - [ ] Jukebox UI
-  - [ ] Figure out general way to approach this. As window resizes, a jukebox ascii art would break.
-  - [ ] So maybe we just have like a layout that LOOKS like a jukebox where it like has a disc and changes it
-  - [ ] Or maybe we replace it with something else when window size gets too small.
-  - [ ] Maybe a little animation that plays when you ask for a recc.
+  - [x] Figure out general way to approach this. As window resizes, a jukebox ascii art would break.
+  - [x] Decided to display album art instead of a jukebox. Cooler this way. Shows reccs album cover when it exists
+  - [ ] Haven't taken screen size into account YET
 - [x] Fix errors when currently no playback, shouldn't exit
 - [x] Playback BAR
   - [ ] Pause/Play that isn't ugly.
@@ -88,8 +87,9 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
   - [x] Track progress
   - [x] Make it prettier
 - [ ] Juke
-  - [ ] Animation (really just fill the space)
+  - [x] Animation (really just fill the space)
   - [x] Instructions (r to get recc, c to add recc to queue)
+  - [ ] Finish album cover stuff (screen size stuff)
 
 ## Known Issues
 

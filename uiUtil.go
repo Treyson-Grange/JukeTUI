@@ -2,8 +2,16 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	_ "image/gif" // These aren't used directly, but are required for image.Decode to work
+	_ "image/jpeg"
+	_ "image/png"
+	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/image/draw"
 )
 
 var (
@@ -27,7 +35,7 @@ var (
 // - string: the truncated string
 func truncate(str string, width int) string {
 	if len(str) > width {
-		return str[:width-3] + "..."
+		return str[:width-5] + "..."
 	}
 	return str
 }
@@ -38,58 +46,60 @@ func msToMinSec(ms int) string {
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
 
-// Horrid ASCII art of a jukebox based on the screen size.
-func GetAsciiJuke(boxWidth, boxHeight int, displayJuke bool) string {
-	var space int
-	var vertSpace int
-	var recommendationDetails string
+const SPOTIFY_GREEN = "#1DB954"
 
-	if !displayJuke {
-		return "Press 'r' to get a recommendation!\n\n\n"
-	}
+// Album Cover Functionality
 
-	if boxWidth < 60 {
-		recommendationDetails = "Press 'r' to get a recommendation!\n\n\n" + `
-
-             @@@@@@@@@             
-          @@           @@          
-       :@                 @-       
-`
-		space = 17
-		vertSpace = boxHeight / 4
-	} else {
-		recommendationDetails = `Press 'r' to get a recommendation!\n\n\n
-                                             
-                            +@@@@@@@@@@@@@@@@@@=                            
-                        @@@@@%                %@@@@@                        
-                     @@@@=                        -@@@@                     
-                   @@@#                              *@@@                   
-                 @@@                                    @@@                 
-               @@@                                        @@@               
-              @@#                                          *@@      	     
-`
-		space = 47
-		vertSpace = boxHeight / 2
-	}
-
-	for i := 0; i < vertSpace; i++ {
-		recommendationDetails += "@"
-		for j := 0; j < space; j++ {
-			if j%10 == 0 {
-				recommendationDetails += "@"
-			} else {
-				recommendationDetails += " "
-			}
-		}
-		recommendationDetails += "@\n"
-	}
-
-	for i := 0; i < space+2; i++ {
-		recommendationDetails += "@"
-	}
-	recommendationDetails += "\n"
-
-	return recommendationDetails
+// given a color, return the ANSI color code
+func bgAnsiColor(c color.Color) string {
+	r, g, b, _ := c.RGBA()// no alpha
+	return fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r>>8, g>>8, b>>8)// 16-bit color to 8-bit
 }
 
-const SPOTIFY_GREEN = "#1DB954"
+// Resize an image to a given width and height
+func resizeImage(img image.Image, width, height int) image.Image {
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
+	return dst
+}
+
+// Print an image to the terminal
+// 
+func printImage(img image.Image) string {
+	bounds := img.Bounds()
+	var result strings.Builder
+
+	// For every pixel in the image, get the color and print it
+	// Intensive operation, MAKE this only happen once.
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		var line strings.Builder
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			color := img.At(x, y)
+			line.WriteString(fmt.Sprintf("%s  \x1b[0m", bgAnsiColor(color)))
+		}
+		result.WriteString(line.String() + "\n")
+	}
+	return result.String()
+}
+
+// Simple fetch for an image given a URL
+func fetchImage(url string) (image.Image, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	img, _, err := image.Decode(resp.Body)
+	return img, err
+}
+
+func makeNewImage(url string) string {
+	img, err := fetchImage(url)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	const targetWidth, targetHeight = 10,10
+
+	return printImage(resizeImage(img, targetWidth, targetHeight))
+}

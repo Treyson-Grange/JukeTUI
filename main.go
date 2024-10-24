@@ -21,6 +21,7 @@ func initialModel(token, listDetail string) Model {
 		listDetail: listDetail,
 		height:     10,
 		progressMs: 0,
+		image:    "_",
 	}
 }
 
@@ -66,6 +67,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "r", "R":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
+			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
 			return m, handleFetchPlayback(m.token)
 
 		case "c", "C":
@@ -97,6 +99,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
 					}
 					handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
+
+					handleGenericFetch[PlaybackState]("/me/player", m.token, nil, nil)
+					m.image = "_"
 					return m, handleFetchPlayback(m.token)
 				}
 			}
@@ -107,6 +112,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loading = false
 		if math.Abs(float64(m.progressMs-msg.ProgressMs)) > 1000 { // Don't bother unless we are more then a second off
 			m.progressMs = msg.ProgressMs
+		}
+		if m.image == "_" {
+			m.image = makeNewImage(m.state.Item.Album.Images[0].URL)
 		}
 		return m, tea.Batch(scheduleNextFetch(3*time.Second), CheckTokenExpiryCmd(m))
 
@@ -165,7 +173,9 @@ func (m Model) View() string {
 		status = "▮▮"
 	}
 
-	recommendationDetails := GetAsciiJuke(boxWidth, boxHeight, false)
+	recommendationDetails := "Press 'r' for a recommendation!"
+
+	recommendationDetails += "\n\n\n" + m.image + "\n"
 
 	if len(m.reccomendation.Tracks) > 0 {
 		recommendationDetails += fmt.Sprintf(
