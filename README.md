@@ -80,3 +80,10 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
 - [ ] On window resize, UI breaks.
 - [ ]
+
+## IDEAS :)
+
+- Favorite system. You can favorite a playlist or album IN APP, and it will go to the TOP of your library list at all times, with a little star.
+  - This would most likely be done by writing to a JSON file, and read on start.
+  - Store: album/playlist name. album/playlist author. URI.
+  - Needs a way to star albums, and a way to remove them (f for favorite? f again to toggle? or maybe we can do like a key combo. Who knows)
