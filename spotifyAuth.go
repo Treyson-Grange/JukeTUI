@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -62,7 +61,7 @@ func GetCodeFromCallback() string {
 	var code string
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		code = r.URL.Query().Get("code")
-		// Add JavaScript to automatically close the window
+		// JavaScript to close the window
 		htmlResponse := `
             <html>
                 <body>
@@ -82,7 +81,7 @@ func GetCodeFromCallback() string {
 	go http.ListenAndServe(":8080", nil)
 
 	for code == "" {
-		time.Sleep(500 * time.Millisecond) // Wait for code
+		time.Sleep(500 * time.Millisecond)
 	}
 	return code
 }
@@ -154,12 +153,4 @@ func RefreshSpotifyToken(refreshToken, clientID, clientSecret string) (SpotifyTo
 		return SpotifyTokenResponse{}, err
 	}
 	return tokenRes, nil
-}
-
-// CheckTokenExpiryCmd refreshes the token if it has expired.
-func CheckTokenExpiryCmd(m Model) tea.Cmd {
-	if time.Now().After(m.tokenExpiresAt) {
-		return refreshSpotifyTokenCmd(m.refreshToken, os.Getenv("SPOTIFY_ID"), os.Getenv("SPOTIFY_SECRET"))
-	}
-	return nil
 }

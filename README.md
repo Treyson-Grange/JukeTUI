@@ -34,14 +34,22 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 ## TODO
 
 - [x] General UI
-- [ ] Better and more generic function calls
+- [x] Better and more generic function calls
 - [x] Reccomendations system (get/add to queue)
-- [ ] Jukebox UI (prettyyyyy)
+- [ ] Jukebox UI
+  - [ ] Figure out general way to approach this. As window resizes, a jukebox ascii art would break.
+  - [ ] So maybe we just have like a layout that LOOKS like a jukebox where it like has a disc and changes it
+  - [ ] Or maybe we replace it with something else when window size gets too small.
+  - [ ] Maybe a little animation that plays when you ask for a recc.
 - [x] Fix errors when currently no playback, shouldn't exit
 - [x] Playback BAR
-  - [x] Pause/Play.
+  - [ ] Pause/Play that isn't ugly.
   - [ ] Progress in Seconds
   - [ ] Image maybe? I feel like ive seen something like this, image in terminal out of unicode chars.
+  - [ ] Steal inspo from spotify, but simpler, as keybinds are used to do most things.
+    - [ ] Shuffle Display
+    - [ ] Song title, artist,
+    - [ ] Track progress 0:54 / 1:52
 - [x] Playlists BOX
   - [x] List all albums/playlists (see below)
   - [x] Cursor to roll over them.
@@ -51,8 +59,10 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
   - [x] Decide how we want to toggle this. In a config? in env? with a arg? probably env. Lets do env
   - [x] Add new env variable to both env and example
   - [x] This will run on start, so we can have a homescreen
+  - [ ] I want a tab secion, so I can swithc tabs and see my playlists or my albums.
+  - [ ] I think lipgloss has tabs, experiment with them
 
-- [] API key lasts for 1 hour. We need a system to get new ones.
+- [ ] API key lasts for 1 hour. We need a system to get new ones.
   - [x] Base functionality
   - [ ] Testing: If we lock our computer but come back before it ends, will it still correctly refresh at the right time?
   - [ ] Testing: What if we don't come back?
@@ -60,3 +70,5 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 ## Known Issues
 
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
+- [ ] On window resize, UI breaks.
+- [ ]

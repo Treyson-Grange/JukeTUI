@@ -22,3 +22,5 @@ func truncate(str string, width int) string {
 	}
 	return str
 }
+
+const SPOTIFY_GREEN = "#1DB954"

@@ -1,10 +1,55 @@
 package main
 
+import (
+	"time"
+)
+
 // Models.go
 // This supplies all models that JukeCLI will use in operation, specifically
 // on get requests. These will allow us to parse our json correctly, and
 // access our data quicker.
 
+type Model struct {
+	//Playback state, including track info, playback status, etc.
+	//For specifics, see PlaybackState struct in models.go
+	state PlaybackState
+
+	//Spotify web API access token. Lasts for 1 hour.
+	token string
+
+	//Spotify web API refresh token. Used to get a new access token when the current one is close to expiration.
+	refreshToken string
+
+	//Time when the current access token expires.
+	tokenExpiresAt time.Time
+
+	//Error message, if any
+	errMsg string
+
+	//Whether or not we're currently fetching access token initially
+	loading bool
+
+	//Current recommendation, if any.
+	reccomendation SpotifyRecommendations
+
+	//List detail, either "album" or "playlist".
+	listDetail string
+
+	//Cursor for the list of albums/playlists.
+	cursor int
+
+	//List of albums/playlists.
+	libraryList []LibraryItem
+
+	//Height of the list of albums/playlists.
+	height int
+}
+
+// tickMsg tells the update to fetch playback state.
+type tickMsg struct{}
+
+// SpotifyUser struct for parsing the user's Spotify profile.
+// Currently, unused.
 type SpotifyUser struct {
 	DisplayName  string `json:"display_name"`
 	ExternalURLs struct {
@@ -16,6 +61,7 @@ type SpotifyUser struct {
 	ID string `json:"id"`
 }
 
+// SpotifyTokenResponse struct for parsing the access token response.
 type SpotifyTokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
@@ -23,6 +69,7 @@ type SpotifyTokenResponse struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
+// SpotifyRecommendations struct for parsing the recommendations response.
 type SpotifyRecommendations struct {
 	Tracks []struct {
 		Name    string `json:"name"`
@@ -33,8 +80,8 @@ type SpotifyRecommendations struct {
 	} `json:"tracks"`
 }
 
-const PLAYBACK_ENDPOINT = "https://api.spotify.com/v1/me/player"
-
+// PlaybackState struct for parsing the playback state response.
+// TODO: a lol of these are absolutely unused, and should be removed, so we don't have to store em.
 type PlaybackState struct {
 	Device struct {
 		ID            string `json:"id"`
@@ -114,6 +161,7 @@ type PlaybackState struct {
 	IsPlaying bool `json:"is_playing"`
 }
 
+// SpotifyAlbum struct for parsing the albums response.
 type SpotifyAlbum struct {
 	Items []struct {
 		Album struct {
@@ -126,6 +174,7 @@ type SpotifyAlbum struct {
 	}
 }
 
+// SpotifyPlaylist struct for parsing the playlists response.
 type SpotifyPlaylist struct {
 	Items []struct {
 		Name  string `json:"name"`
@@ -136,6 +185,7 @@ type SpotifyPlaylist struct {
 	}
 }
 
+// LibraryItem struct for storing album/playlist information.
 type LibraryItem struct {
 	name   string
 	artist string

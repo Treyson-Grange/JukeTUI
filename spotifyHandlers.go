@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
 // SpotifyHandlers.go
 // This file contains the error handling functions for Spotify API requests.
 
@@ -32,4 +38,25 @@ func handleGenericPost(endpoint, accessToken string, queryParams, bodyArgs map[s
 		return statusCode, err
 	}
 	return statusCode, nil
+}
+
+// Handler to fetch the playback state.
+func handleFetchPlayback(token string) tea.Cmd {
+	return func() tea.Msg {
+		state := handleGenericFetch[PlaybackState]("/me/player", token, nil, nil)
+		return state
+	}
+}
+
+// Handler to fetch the library.
+func handleFetchLibrary(token string, listDetail string, height int) tea.Cmd {
+	return func() tea.Msg {
+		if listDetail == "album" {
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
+			return albums
+		} else {
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
+			return playlist
+		}
+	}
 }
