@@ -1,4 +1,4 @@
-module github.com/treyson-grange/JukeCLI
+module github.com/treyson-grange/JukeTUI
 
 go 1.23.2
 

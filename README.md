@@ -1,24 +1,32 @@
-# JukeCLI
+# JukeTUI
+
+JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and receive music recommendations through an intuitive jukebox system.
+
+### Features:
+
+- Jukebox: Get tailored song recommendations based on your currently playing track and easily queue songs for seamless listening.
+- Library: Browse your Spotify music library, including albums and playlists, and play your favorite tracks directly from the app.
+- Playback Bar: Effortlessly manage your music with controls to play, pause, skip tracks, and view what’s currently playing.
 
 ## Setup
 
-JukeCLI requires the use of Spotify's API, and you will have to create your own "spotify app" on the Spotify dashboard for developers. This process isn't that bad. Details are discussed below
+JukeTUI requires the use of Spotify's API, and you will have to create your own "spotify app" on the Spotify dashboard for developers. This process isn't that bad. Details are discussed below
 
 ### Connecting to Spotify's API
 
-`JukeCLI` is specifically a spotify command line interface `. Therefore you need to follow these steps for JukeCLI to run.
+`JukeTUI` is specifically a spotify app. Therefore you will need to follow the steps to create your own spotify application. Don't worry, it's easy! As long as you are subscribed to spotify premium that is.
 
 1. Go to the Spotify dashboard for developers
 2. You will need to "Create app" and follow the instructions there.
-3. In the settings of the new app, you will find a Client ID and Client secret
-4. Copy `.env.example` into `.env` and paste your Client ID and Client secret into the corresponding variables.
-5. You will then have to setup a Redirect URI. This is done in the app dashboard. Click settings, Edit, and change the Redirect URIs and set it to `http://localhost:8080/callback`
+3. In the settings of the new app, you will find a TUIent ID and TUIent secret
+4. Copy `.env.example` into `.env` and paste your TUIent ID and TUIent secret into the corresponding variables.
+5. You will then have to setup a Redirect URI. This is done in the app dashboard. TUIck settings, Edit, and change the Redirect URIs and set it to `http://localhost:8080/callback`
 6. On run, you will be asked to grant spotify permissions.
 7. On return, you will be in the app, ready to go.
 
 ### Setup your environment
 
-#### .env
+#### `.env`
 
 - To set up your `.env`, copy `.env.example` into `.env`.
 

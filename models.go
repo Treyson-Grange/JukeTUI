@@ -5,7 +5,7 @@ import (
 )
 
 // Models.go
-// This supplies all models that JukeCLI will use in operation, specifically
+// This supplies all models that JukeTUI will use in operation, specifically
 // on get requests. These will allow us to parse our json correctly, and
 // access our data quicker.
 
