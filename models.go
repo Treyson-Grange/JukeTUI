@@ -43,10 +43,16 @@ type Model struct {
 
 	//Height of the list of albums/playlists.
 	height int
+
+	//Progress of current track in ms
+	progressMs int
 }
 
-// tickMsg tells the update to fetch playback state.
-type tickMsg struct{}
+// playbackMsg tells the update to fetch playback state.
+type playbackMsg struct{}
+
+// progressMsg tells the update to update the progress of the current track.
+type progressMsg struct{}
 
 // SpotifyUser struct for parsing the user's Spotify profile.
 // Currently, unused.

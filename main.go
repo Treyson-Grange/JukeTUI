@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"time"
 
@@ -19,6 +20,7 @@ func initialModel(token, listDetail string) Model {
 		loading:    true,
 		listDetail: listDetail,
 		height:     10,
+		progressMs: 0,
 	}
 }
 
@@ -37,6 +39,7 @@ func (m Model) Init() tea.Cmd {
 	}
 	return tea.Batch(
 		handleFetchPlayback(m.token),
+		scheduleProgressInc(1*time.Second),
 		handleFetchLibrary(m.token, m.listDetail, height-11),
 	)
 }
@@ -93,13 +96,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
 				}
 				handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
-				return m, handleFetchPlayback(m.token) //idk if this is working lol
+				return m, handleFetchPlayback(m.token)
 			}
 		}
 
 	case PlaybackState:
 		m.state = msg
 		m.loading = false
+		if math.Abs(float64(m.progressMs-msg.ProgressMs)) > 1000 { // Don't bother unless we are more then a second off
+			m.progressMs = msg.ProgressMs
+		}
 		return m, tea.Batch(scheduleNextFetch(3*time.Second), CheckTokenExpiryCmd(m))
 
 	case SpotifyTokenResponse:
@@ -124,8 +130,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loading = false
 		return m, scheduleNextFetch(3 * time.Second)
 
-	case tickMsg:
+	case playbackMsg:
 		return m, handleFetchPlayback(m.token)
+
+	case progressMsg:
+		m.progressMs += 1000
+		return m, scheduleProgressInc(1 * time.Second)
 	}
 
 	return m, nil
@@ -181,7 +191,7 @@ func (m Model) View() string {
 
 	var playback string
 	if m.state.Item.Artists != nil {
-		playback = "Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + "  " + status
+		playback = "Now playing: " + m.state.Item.Name + " - " + m.state.Item.Artists[0].Name + "  " + status + "  " + msToMinSec(m.progressMs) + "/" + msToMinSec(m.state.Item.DurationMs)
 	} else {
 		playback = "No Playback Data. Please start a playback session on your device"
 	}
@@ -201,7 +211,14 @@ func (m Model) View() string {
 func scheduleNextFetch(d time.Duration) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(d)
-		return tickMsg{}
+		return playbackMsg{}
+	}
+}
+
+func scheduleProgressInc(d time.Duration) tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(d)
+		return progressMsg{}
 	}
 }
 

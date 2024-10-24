@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -28,6 +30,12 @@ func truncate(str string, width int) string {
 		return str[:width-3] + "..."
 	}
 	return str
+}
+
+// Turn ms to 5:30 format
+func msToMinSec(ms int) string {
+	sec := ms / 1000
+	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
 
 const SPOTIFY_GREEN = "#1DB954"

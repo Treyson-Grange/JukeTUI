@@ -85,7 +85,8 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - [ ] PlaybackBar
   - [x] Title/Artist
   - [x] Paused or playing
-  - [ ] Track progress
+  - [x] Track progress
+  - [ ] Make it prettier
 - [ ] Juke
   - [ ] Animation (really just fill the space)
 
