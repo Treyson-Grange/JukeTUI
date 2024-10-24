@@ -93,6 +93,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
 				}
 				handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
+				return m, handleFetchPlayback(m.token) //idk if this is working lol
 			}
 		}
 

@@ -16,6 +16,13 @@ var (
 )
 
 // Truncate a string to fit any width
+//
+// Parameters:
+// - str: the string to truncate
+// - width: the width to truncate the string to
+//
+// Returns:
+// - string: the truncated string
 func truncate(str string, width int) string {
 	if len(str) > width {
 		return str[:width-3] + "..."

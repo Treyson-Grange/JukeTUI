@@ -9,7 +9,19 @@ import (
 // SpotifyHandlers.go
 // This file contains the error handling functions for Spotify API requests.
 
-// Generic fetch/get function for Spotify API requests.
+// handleGenericFetch makes a generic fetch request to the Spotify API.
+//
+// Parameters:
+// - endpoint: The endpoint to fetch data from.
+// - accessToken: Spotify access token.
+// - queryParams: Query parameters as a map of strings.
+// - bodyArgs: Body arguments as a map of strings.
+//
+// Returns:
+// - The data fetched from the endpoint.
+//
+// Type	parameters:
+// - T: The type of data expected to be fetched from the endpoint.
 func handleGenericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) T {
 	data, err := genericFetch[T](endpoint, accessToken, queryParams, bodyArgs)
 	if err != nil {
@@ -20,7 +32,17 @@ func handleGenericFetch[T any](endpoint, accessToken string, queryParams, bodyAr
 	return data
 }
 
-// Generic PUT function for Spotify API requests.
+// handleGenericPut
+//
+// Parameters:
+// - endpoint: The endpoint to send data to
+// - accessToken: Spotify access token
+// - queryParams: Query parameters
+// - bodyArgs: Body arguments
+//
+// Returns:
+// - statusCode: The status code of the request
+// - err: The error message
 func handleGenericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
 	statusCode, err := genericPut(endpoint, accessToken, queryParams, bodyArgs)
 	if err != nil {
@@ -30,7 +52,17 @@ func handleGenericPut(endpoint, accessToken string, queryParams, bodyArgs map[st
 	return statusCode, nil
 }
 
-// Generic POST function for Spotify API requests.
+// handleGenericPost makes a generic POST request to the Spotify API.
+//
+// Parameters:
+// - endpoint: The endpoint to post data to.
+// - accessToken: Spotify access token.
+// - queryParams: Query parameters as a map of strings.
+// - bodyArgs: Body arguments as a map of strings.
+//
+// Returns:
+// - The status code of the request.
+// - An error if the request failed.
 func handleGenericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
 	statusCode, err := genericPost(endpoint, accessToken, queryParams, bodyArgs)
 	if err != nil {
@@ -40,7 +72,13 @@ func handleGenericPost(endpoint, accessToken string, queryParams, bodyArgs map[s
 	return statusCode, nil
 }
 
-// Handler to fetch the playback state.
+// handleFetchPlayback fetches the playback state from the Spotify API.
+//
+// Parameters:
+// - token: Spotify access token.
+//
+// Returns:
+// - The playback state.
 func handleFetchPlayback(token string) tea.Cmd {
 	return func() tea.Msg {
 		state := handleGenericFetch[PlaybackState]("/me/player", token, nil, nil)
@@ -48,7 +86,15 @@ func handleFetchPlayback(token string) tea.Cmd {
 	}
 }
 
-// Handler to fetch the library.
+// handleFetchLibrary fetches the user's library from the Spotify API.
+//
+// Parameters:
+// - token: Spotify access token.
+// - listDetail: The type of library to fetch (album or playlist).
+// - height: The number of items to fetch.
+//
+// Returns:
+// - The fetched library.
 func handleFetchLibrary(token string, listDetail string, height int) tea.Cmd {
 	return func() tea.Msg {
 		if listDetail == "album" {

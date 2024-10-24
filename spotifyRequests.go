@@ -14,6 +14,20 @@ import (
 // These functions are used by the handlers to fetch data from the Spotify API.
 // Should rename this file eventually.
 
+// genericFetch makes a GET request to the Spotify API and returns the response as a struct.
+//
+// Parameters:
+// - endpoint: the endpoint to fetch data from
+// - accessToken: the access token to authenticate the request
+// - queryParams: the query parameters to include in the request
+// - bodyArgs: the body arguments to include in the request
+//
+// Returns:
+// - T: the response data as a struct
+// - error: an error if the request fails
+//
+// Type Parameters:
+// - T: the type of the response data
 func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
 	var result T
 
@@ -56,6 +70,17 @@ func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map
 	return result, nil
 }
 
+// genericPut makes a PUT request to the Spotify API and returns the response code.
+//
+// Parameters:
+// - endpoint: the endpoint to fetch data from
+// - accessToken: the access token to authenticate the request
+// - queryParams: the query parameters to include in the request
+// - bodyArgs: the body arguments to include in the request
+//
+// Returns:
+// - int: the response code
+// - error: an error if the request fails
 func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
 	body, err := json.Marshal(bodyArgs)
 	if err != nil {
@@ -83,6 +108,17 @@ func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]s
 	return resp.StatusCode, nil
 }
 
+// genericPost makes a POST request to the Spotify API and returns the response code.
+//
+// Parameters:
+// - endpoint: the endpoint to fetch data from
+// - accessToken: the access token to authenticate the request
+// - queryParams: the query parameters to include in the request
+// - bodyArgs: the body arguments to include in the request
+//
+// Returns:
+// - int: the response code
+// - error: an error if the request fails
 func genericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
 	body, err := json.Marshal(bodyArgs)
 	if err != nil {

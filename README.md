@@ -83,7 +83,27 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 
 ## IDEAS :)
 
-- Favorite system. You can favorite a playlist or album IN APP, and it will go to the TOP of your library list at all times, with a little star.
+If checked, it's a TODO.
+
+- [ ] Favorite system. You can favorite a playlist or album IN APP, and it will go to the TOP of your library list at all times, with a little star.
+
   - This would most likely be done by writing to a JSON file, and read on start.
   - Store: album/playlist name. album/playlist author. URI.
   - Needs a way to star albums, and a way to remove them (f for favorite? f again to toggle? or maybe we can do like a key combo. Who knows)
+
+- [ ] FREE spotify system
+  - Not everyone pays for spotify premium. This kills our API at points:
+    - Pause, Skip, Start, Shuffle, Add to queue.
+  - This kills a lot of the app.
+  - We can check if someone has spotify premium, 403 PREMIUM_REQUIRED.
+  - And according to forums, spotify free accounts can still create 'apps'
+  - So, if we can set it up such that once we get our key, we can call a known "spotify premium exclusive" endpoint
+  - Based on output, we can set some var, changing functionality in our application.
+  - Functionality without spotify premium is SUPER bare bones. I'm pretty sure we won't be able to interact with the library.
+    - We can GET the library, but we cannot PLAY the albums/playlists
+    - We can GET a reccomendation, but we cannot add it to the queue.
+    - We can LOOK at how much
+  - Ideas to get around this (make it useful with possible endpoints):
+    - Change library into a history section. /me/player/recently-played
+    - Change Juke section into a queue section.
+    - Disable Pause, skip, add to queue.
