@@ -26,13 +26,6 @@ var (
 )
 
 // Truncate a string to fit any width
-//
-// Parameters:
-// - str: the string to truncate
-// - width: the width to truncate the string to
-//
-// Returns:
-// - string: the truncated string
 func truncate(str string, width int) string {
 	if len(str) > width {
 		return str[:width-5] + "..."
@@ -64,7 +57,6 @@ func resizeImage(img image.Image, width, height int) image.Image {
 }
 
 // Print an image to the terminal
-// 
 func printImage(img image.Image) string {
 	bounds := img.Bounds()
 	var result strings.Builder
@@ -94,12 +86,13 @@ func fetchImage(url string) (image.Image, error) {
 	return img, err
 }
 
+// Handler for fetching an image, resizing it, and returning it as a string
 func makeNewImage(url string) string {
 	img, err := fetchImage(url)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	const targetWidth, targetHeight = 10,10
+	const targetWidth, targetHeight = 15,15
 
 	return printImage(resizeImage(img, targetWidth, targetHeight))
 }

@@ -52,13 +52,12 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
   - [ ] Haven't taken screen size into account YET
 - [x] Fix errors when currently no playback, shouldn't exit
 - [x] Playback BAR
-  - [ ] Pause/Play that isn't ugly.
-  - [ ] Progress in Seconds
-  - [ ] Image maybe? I feel like ive seen something like this, image in terminal out of unicode chars.
+  - [x] Pause/Play that isn't ugly.
+  - [x] Progress in Seconds
   - [ ] Steal inspo from spotify, but simpler, as keybinds are used to do most things.
     - [ ] Shuffle Display
-    - [ ] Song title, artist,
-    - [ ] Track progress 0:54 / 1:52
+    - [x] Song title, artist,
+    - [x] Track progress 0:54 / 1:52
 - [x] Playlists BOX
   - [x] List all albums/playlists (see below)
   - [x] Cursor to roll over them.
@@ -94,7 +93,7 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 ## Known Issues
 
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
-- [ ] On window resize, UI breaks.
+- [ ] On window resize, UI breaks. (sometimes)
 - [ ] Spotify Freemium does not functon with this app.
 
 ## IDEAS :)
@@ -128,6 +127,7 @@ If not, it's a stretch goal.
     - Disable Pause, skip, add to queue.
 
 - [x] Audiobook / Podcast integration?
+
   - With minimal testing, I realized that playback state doesn't include podcast stuff.
   - Structures:
     - "shows"
@@ -139,3 +139,8 @@ If not, it's a stretch goal.
       - Also playable with /play
     - "audiobook"
       - Interestingly, these are also shows, (spotify:show:0WAgAsP8MT7ae5p6gwL257 is an audio book)
+
+- [ ] Liked songs?
+  - [ ] Liked songs isn't a playlist, and won't show up on the library section. I think it would be NICE to have it available when playlists are being displayed.
+  - [ ] `/me/tracks` is the endpoint that GETS them all, but there is no endpoint to PLAY them. It can get up to a total of 50.
+  - [ ] First thoughts are to get total liked songs, randomize it ourselves. Online forums weren't super helful.
