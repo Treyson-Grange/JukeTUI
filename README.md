@@ -75,28 +75,13 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
   - [x] Testing: If we lock our computer but come back before it ends, will it still correctly refresh at the right time?
   - [x] Testing: What if we don't come back?
 
-## TODO before initial release (make public)
-
-- [x] Documentation (bare bones)
-- [x] Library
-  - [x] Still in env, no tabs yet
-- [x] PlaybackBar
-  - [x] Title/Artist
-  - [x] Paused or playing
-  - [x] Track progress
-  - [x] Make it prettier
-- [ ] Juke
-  - [x] Animation (really just fill the space)
-  - [x] Instructions (r to get recc, c to add recc to queue)
-  - [ ] Finish album cover stuff (screen size stuff)
-
 ## Known Issues
 
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
 - [ ] On window resize, UI breaks. (sometimes)
 - [ ] Spotify Freemium does not functon with this app.
 
-## IDEAS :)
+## IDEAS
 
 If checked, it's gonna happen.
 
