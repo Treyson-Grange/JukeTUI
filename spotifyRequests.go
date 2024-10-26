@@ -12,136 +12,86 @@ import (
 // Spotify.go
 // This file contains the generic functions for fetching data from the Spotify API.
 // These functions are used by the handlers to fetch data from the Spotify API.
-// Should rename this file eventually.
 
-// genericFetch makes a GET request to the Spotify API and returns the response as a struct.
+// genericRequest makes an HTTP request to the Spotify API and returns the response as a struct or a response code.
 //
 // Parameters:
+// - method: the HTTP method to use (GET, POST, PUT)
 // - endpoint: the endpoint to fetch data from
 // - accessToken: the access token to authenticate the request
 // - queryParams: the query parameters to include in the request
 // - bodyArgs: the body arguments to include in the request
 //
 // Returns:
-// - T: the response data as a struct
+// - T: the response data as a struct if method is GET
+// - int: the response code if method is POST or PUT
 // - error: an error if the request fails
 //
 // Type Parameters:
 // - T: the type of the response data
-func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
+func genericRequest[T any](method, endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, int, error) {
 	var result T
+	var resp *http.Response
 
-	req, err := http.NewRequest(http.MethodGet, createEndpoint(endpoint, queryParams), nil)
+	// Create request body if bodyArgs are provided
+	var body io.Reader
+	if bodyArgs != nil {
+		bodyJSON, err := json.Marshal(bodyArgs)
+		if err != nil {
+			return result, 500, err
+		}
+		body = bytes.NewReader(bodyJSON)
+	}
+
+	req, err := http.NewRequest(method, createEndpoint(endpoint, queryParams), body)
 	if err != nil {
-		return result, err
+		return result, 500, err
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-
-	if bodyArgs != nil {
-		body, err := json.Marshal(bodyArgs)
-		if err != nil {
-			return result, err
-		}
-		req.Body = io.NopCloser(bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-	}
+	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	resp, err = client.Do(req)
 	if err != nil {
-		return result, err
+		if resp != nil {
+			return result, resp.StatusCode, err
+		}
+		return result, 500, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusForbidden {
-		return result, fmt.Errorf("missing required permissions")
+		return result, resp.StatusCode, fmt.Errorf("missing required permissions")
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return result, err
+	if method == http.MethodGet {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return result, resp.StatusCode, err
+		}
+		if err := json.Unmarshal(bodyBytes, &result); err != nil {
+			return result, resp.StatusCode, err
+		}
 	}
 
-	if err := json.Unmarshal(body, &result); err != nil {
-		return result, err
-	}
+	return result, resp.StatusCode, nil
+}
 
-	return result, nil
+// genericFetch makes a GET request to the Spotify API and returns the response as a struct.
+func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
+	result, _, err := genericRequest[T](http.MethodGet, endpoint, accessToken, queryParams, bodyArgs)
+	return result, err
 }
 
 // genericPut makes a PUT request to the Spotify API and returns the response code.
-//
-// Parameters:
-// - endpoint: the endpoint to fetch data from
-// - accessToken: the access token to authenticate the request
-// - queryParams: the query parameters to include in the request
-// - bodyArgs: the body arguments to include in the request
-//
-// Returns:
-// - int: the response code
-// - error: an error if the request fails
 func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
-	body, err := json.Marshal(bodyArgs)
-	if err != nil {
-		return 500, err
-	}
-
-	req, err := http.NewRequest(http.MethodPut, createEndpoint(endpoint, queryParams), io.NopCloser(bytes.NewReader(body)))
-	if err != nil {
-		return 500, err
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		if resp != nil {
-			return resp.StatusCode, err
-		}
-		return 500, err
-	}
-
-	defer resp.Body.Close()
-
-	return resp.StatusCode, nil
+	_, statusCode, err := genericRequest[struct{}](http.MethodPut, endpoint, accessToken, queryParams, bodyArgs)
+	return statusCode, err
 }
 
 // genericPost makes a POST request to the Spotify API and returns the response code.
-//
-// Parameters:
-// - endpoint: the endpoint to fetch data from
-// - accessToken: the access token to authenticate the request
-// - queryParams: the query parameters to include in the request
-// - bodyArgs: the body arguments to include in the request
-//
-// Returns:
-// - int: the response code
-// - error: an error if the request fails
 func genericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
-	body, err := json.Marshal(bodyArgs)
-	if err != nil {
-		return 500, err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, createEndpoint(endpoint, queryParams), io.NopCloser(bytes.NewReader(body)))
-	if err != nil {
-		return 500, err
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		if resp != nil {
-			return resp.StatusCode, err
-		}
-		return 500, err
-	}
-
-	defer resp.Body.Close()
-
-	return resp.StatusCode, nil
+	_, statusCode, err := genericRequest[struct{}](http.MethodPost, endpoint, accessToken, queryParams, bodyArgs)
+	return statusCode, err
 }

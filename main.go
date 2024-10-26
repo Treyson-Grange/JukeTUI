@@ -14,13 +14,11 @@ import (
 	"golang.org/x/term"
 )
 
-func initialModel(token, listDetail string) Model {
+func initialModel(token, listDetail string, height int) Model {
 	return Model{
 		token:      token,
-		loading:    true,
 		listDetail: listDetail,
-		height:     10,
-		progressMs: 0,
+		height:     height,
 	}
 }
 
@@ -39,8 +37,9 @@ func (m Model) Init() tea.Cmd {
 	}
 	return tea.Batch(
 		handleFetchPlayback(m.token),
+		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
-		handleFetchLibrary(m.token, m.listDetail, height-11),
+		handleFetchLibrary(m.token, m.listDetail, height-10, 0),
 	)
 }
 
@@ -90,6 +89,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor = 0
 			}
 
+		case "right":
+			m.loading = true
+			if m.offset+m.height-10 < m.apiTotal {
+				m.offset += m.height - UI_LIBRARY_SPACE
+			} else {
+				m.offset = 0
+			}
+			return m, handleFetchLibrary(m.token, m.listDetail, m.height-10, m.offset)
+
+		case "left":
+			m.loading = true
+			if m.offset > m.height-10 {
+				m.offset -= m.height - UI_LIBRARY_SPACE
+			} else {
+				m.offset = 0
+			}
+			return m, handleFetchLibrary(m.token, m.listDetail, m.height-10, m.offset)
+
 		case "enter":
 			if m.state.IsPlaying {
 				if m.libraryList != nil {
@@ -111,7 +128,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.state = msg
-		m.loading = false
 		if math.Abs(float64(m.progressMs-msg.ProgressMs)) > 1000 { // Don't bother unless we are more then a second off
 			m.progressMs = msg.ProgressMs
 		}
@@ -126,12 +142,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.libraryList = nil
 		for _, album := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, artist: album.Album.Artists[0].Name, uri: album.Album.URI})
+			m.apiTotal = msg.Total
+			m.loading = false
 		}
 
 	case SpotifyPlaylist:
 		m.libraryList = nil
 		for _, playlist := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, artist: playlist.Owner.DisplayName, uri: playlist.URI})
+			m.apiTotal = msg.Total
+			m.loading = false
 		}
 
 	case error:
@@ -143,7 +163,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, handleFetchPlayback(m.token)
 
 	case progressMsg:
-		m.progressMs += 1000
+		if m.state.IsPlaying {
+			m.progressMs += 1000
+		}
 		return m, scheduleProgressInc(1 * time.Second)
 	}
 
@@ -151,69 +173,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+	//TODO: this is calling GetSize every view. Store it in our model.
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		log.Fatalf("Failed to get terminal size: %v", err)
 	}
 	boxWidth := width/2 - 2
-	boxHeight := height - 10
-	playBackHeight := 1
+	boxHeight := height - UI_LIBRARY_SPACE
 	playBackWidth := width - 2
 
-	if m.loading {
-		return "Loading playback state...\n"
-	}
-	if m.errMsg != "" {
-		return fmt.Sprintf("Error: %s\n", m.errMsg)
-	}
-
-	status := "▶ "
-	if m.state.IsPlaying {
-		status = "▮▮"
-	}
-
-	recommendationDetails := "Press 'r' for a recommendation!"
-
-	recommendationDetails += "\n\n\n" + m.image + "\n"
-
-	if len(m.reccomendation.Tracks) > 0 {
-		recommendationDetails += fmt.Sprintf(
-			"Recommendation: %s - %s\n 'c' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name,
-		)
-	}
-
-	libText := ""
-	if m.libraryList != nil {
-		const CHARACTERS = 6 // Characters we have to account for when truncating
-		for i, item := range m.libraryList {
-			if i == m.cursor {
-				item = LibraryItem{
-					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
-					artist: item.artist,
-					uri:    item.uri,
-				}
-			} else {
-				item = LibraryItem{
-					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
-					artist: item.artist,
-					uri:    item.uri,
-				}
-			}
-			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
-			libText += fmt.Sprintf("%s - %s%s\n", item.name, item.artist, play)
-		}
-	}
-
-	var playback string
-	if m.state.Item.Artists != nil {
-		playback = "🎵 [ " + m.state.Item.Name + " | " + m.state.Item.Artists[0].Name + " ]  " + lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status) + "  [ " + msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs) + " ]"
-	} else {
-		playback = "No Playback Data. Please start a playback session on your device"
-	}
+	libText, playback, reccDetails := getUiElements(m, boxWidth)
 
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
-	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(recommendationDetails)
-	playbackBar := boxStyle.Width(playBackWidth).Height(playBackHeight).Render(playback)
+	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(reccDetails)
+	playbackBar := boxStyle.Width(playBackWidth).Height(1).Render(playback)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
@@ -230,6 +203,7 @@ func scheduleNextFetch(d time.Duration) tea.Cmd {
 	}
 }
 
+// Schedule the next increment of the progress bar.
 func scheduleProgressInc(d time.Duration) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(d)
@@ -257,7 +231,12 @@ func main() {
 	fmt.Println("Login successful! Access token retrieved.")
 	fmt.Println("Press 'p' to Play/Pause, 'n' to Skip, 'q' to Quit")
 
-	model := initialModel(token.AccessToken, listDetail)
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		log.Fatalf("Failed to get terminal size: %v", err)
+	}
+
+	model := initialModel(token.AccessToken, listDetail, height)
 	model.refreshToken = token.RefreshToken
 	model.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 

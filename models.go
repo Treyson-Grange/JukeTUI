@@ -49,6 +49,12 @@ type Model struct {
 
 	// Album cover image as string
 	image string
+
+	// Offset for pagination of albums/playlists
+	offset int
+
+	// Total Library Items
+	apiTotal int
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -186,6 +192,7 @@ type SpotifyAlbum struct {
 			}
 		}
 	}
+	Total int `json:"total"`
 }
 
 // SpotifyPlaylist struct for parsing the playlists response.
@@ -197,6 +204,7 @@ type SpotifyPlaylist struct {
 			DisplayName string `json:"display_name"`
 		}
 	}
+	Total int `json:"total"`
 }
 
 // LibraryItem struct for storing album/playlist information.

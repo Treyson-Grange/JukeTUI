@@ -96,17 +96,35 @@ func handleFetchPlayback(token string) tea.Cmd {
 //
 // Returns:
 // - The fetched library.
-func handleFetchLibrary(token string, listDetail string, height int) tea.Cmd {
+func handleFetchLibrary(token string, listDetail string, height, offset int) tea.Cmd {
 	return func() tea.Msg {
-		// Spotify limit is 50
 		height = int(math.Min(float64(height), 50))
 		if listDetail == "album" {
-			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
 			return albums
 		} else {
-			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height)}, nil)
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
 			return playlist
 		}
 	}
 }
 
+// handleFetchPlaylist fetches a playlist from the Spotify API.
+//
+// Parameters:
+// - token: Spotify access token.
+// - playlistID: The ID of the playlist to fetch.
+//
+// Returns:
+// - The fetched playlist.
+func handleGetLibraryTotal(token string, listDetail string) tea.Cmd {
+	return func() tea.Msg {
+		if listDetail == "album" {
+			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": "1"}, nil)
+			return albums.Total
+		} else {
+			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "1"}, nil)
+			return playlist.Total
+		}
+	}
+}

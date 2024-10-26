@@ -103,3 +103,4 @@ If not, it's a stretch goal.
     - Store current length, offset by that to go to next page.
     - Total pages = total playlists or albums / pageSize.
     - (change library to have header, say "\_\_\_'s Albums/Playlists | Page 2/6")
+    - Store the next call, so there is no wait.

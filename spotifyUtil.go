@@ -13,7 +13,7 @@ import (
 // This file holds any utils that interact with the inner workings of
 // our spotify system.
 
-const SPOTIFY_API = "https://api.spotify.com/v1" //TODO: where to put this const?
+const SPOTIFY_API = "https://api.spotify.com/v1"
 
 // createEndpoint creates a full endpoint URL with query parameters.
 //
