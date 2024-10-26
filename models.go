@@ -46,7 +46,7 @@ type Model struct {
 
 	//Progress of current track in ms
 	progressMs int
-	
+
 	// Album cover image as string
 	image string
 }
@@ -85,7 +85,7 @@ type SpotifyRecommendations struct {
 		Artists []struct {
 			Name string `json:"name"`
 		} `json:"artists"`
-		URI string `json:"uri"`
+		URI   string `json:"uri"`
 		Album struct {
 			Image []struct {
 				URL string `json:"url"`
@@ -204,5 +204,4 @@ type LibraryItem struct {
 	name   string
 	artist string
 	uri    string
-	imageURL string
 }

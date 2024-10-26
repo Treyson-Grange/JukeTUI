@@ -66,14 +66,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "r", "R":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
-			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
+			m.image = makeNewImage(m.reccomendation.Tracks[2].Album.Image[0].URL)
 			return m, handleFetchPlayback(m.token)
 
 		case "c", "C":
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
-			m.image = makeNewImage(m.state.Item.Album.Images[0].URL)
+			m.image = makeNewImage(m.state.Item.Album.Images[2].URL)
 			return m, handleFetchPlayback(m.token)
 
 		case "up":
@@ -107,7 +107,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case PlaybackState:
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Album.Name != msg.Item.Album.Name {
-				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
+				m.image = makeNewImage(msg.Item.Album.Images[2].URL)
 			}
 		}
 		m.state = msg
@@ -190,15 +190,15 @@ func (m Model) View() string {
 				item = LibraryItem{
 					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist: item.artist,
-					uri:   item.uri,
+					uri:    item.uri,
 				}
 			} else {
 				item = LibraryItem{
 					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
 					artist: item.artist,
-					uri:   item.uri,
+					uri:    item.uri,
 				}
-			} 
+			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
 			libText += fmt.Sprintf("%s - %s%s\n", item.name, item.artist, play)
 		}
