@@ -41,40 +41,6 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - Spotify Preference will alter what is displayed in the cursor section. Your saved albums or your saved playlists.
   - (This feature might turn into 'tabs' eventually, so we can have both)
 
-## TODO
-
-- [x] General UI
-- [x] Better and more generic function calls
-- [x] Reccomendations system (get/add to queue)
-- [ ] Jukebox UI
-  - [x] Figure out general way to approach this. As window resizes, a jukebox ascii art would break.
-  - [x] Decided to display album art instead of a jukebox. Cooler this way. Shows reccs album cover when it exists
-  - [ ] Haven't taken screen size into account YET
-- [x] Fix errors when currently no playback, shouldn't exit
-- [x] Playback BAR
-  - [x] Pause/Play that isn't ugly.
-  - [x] Progress in Seconds
-  - [ ] Steal inspo from spotify, but simpler, as keybinds are used to do most things.
-    - [ ] Shuffle Display
-    - [x] Song title, artist,
-    - [x] Track progress 0:54 / 1:52
-- [x] Playlists BOX
-  - [x] List all albums/playlists (see below)
-  - [x] Cursor to roll over them.
-  - [x] Button to play them.
-- [x] I am a album guy, some people are playlist people. Therefore, we'll need a toggle to either display Users saved albums or users playlists.
-
-  - [x] Decide how we want to toggle this. In a config? in env? with a arg? probably env. Lets do env
-  - [x] Add new env variable to both env and example
-  - [x] This will run on start, so we can have a homescreen
-  - [ ] I want a tab secion, so I can swithc tabs and see my playlists or my albums.
-  - [ ] I think lipgloss has tabs, experiment with them
-
-- [x] API key lasts for 1 hour. We need a system to get new ones.
-  - [x] Base functionality
-  - [x] Testing: If we lock our computer but come back before it ends, will it still correctly refresh at the right time?
-  - [x] Testing: What if we don't come back?
-
 ## Known Issues
 
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
@@ -126,6 +92,14 @@ If not, it's a stretch goal.
       - Interestingly, these are also shows, (spotify:show:0WAgAsP8MT7ae5p6gwL257 is an audio book)
 
 - [ ] Liked songs?
-  - [ ] Liked songs isn't a playlist, and won't show up on the library section. I think it would be NICE to have it available when playlists are being displayed.
-  - [ ] `/me/tracks` is the endpoint that GETS them all, but there is no endpoint to PLAY them. It can get up to a total of 50.
-  - [ ] First thoughts are to get total liked songs, randomize it ourselves. Online forums weren't super helful.
+
+  - Liked songs isn't a playlist, and won't show up on the library section. I think it would be NICE to have it available when playlists are being displayed.
+  - `/me/tracks` is the endpoint that GETS them all, but there is no endpoint to PLAY them. It can get up to a total of 50.
+  - First thoughts are to get total liked songs, randomize it ourselves. Online forums weren't super helful.
+
+- [x] Scrollable Library.
+  - Spotify API has a limit of 50 on the album/playlist endpoint.
+  - But it also has a "offset". This offset can be used to create artificial pagination
+    - Store current length, offset by that to go to next page.
+    - Total pages = total playlists or albums / pageSize.
+    - (change library to have header, say "\_\_\_'s Albums/Playlists | Page 2/6")

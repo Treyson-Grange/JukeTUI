@@ -45,13 +45,16 @@ const SPOTIFY_GREEN = "#1DB954"
 
 // given a color, return the ANSI color code
 func bgAnsiColor(c color.Color) string {
-	r, g, b, _ := c.RGBA()// no alpha
-	return fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r>>8, g>>8, b>>8)// 16-bit color to 8-bit
+	r, g, b, _ := c.RGBA()                                      // no alpha
+	return fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r>>8, g>>8, b>>8) // 16-bit color to 8-bit
 }
 
 // Resize an image to a given width and height
 func resizeImage(img image.Image, width, height int) image.Image {
 	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	if img == nil || dst == nil {
+		return nil
+	}
 	draw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), draw.Over, nil)
 	return dst
 }
@@ -92,7 +95,7 @@ func makeNewImage(url string) string {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	const targetWidth, targetHeight = 15,15
+	const targetWidth, targetHeight = 15, 15
 
 	return printImage(resizeImage(img, targetWidth, targetHeight))
 }
