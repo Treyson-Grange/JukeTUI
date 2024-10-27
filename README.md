@@ -98,6 +98,7 @@ If not, it's a stretch goal.
   - First thoughts are to get total liked songs, randomize it ourselves. Online forums weren't super helful.
 
 - [x] Scrollable Library.
+
   - Spotify API has a limit of 50 on the album/playlist endpoint.
   - But it also has a "offset". This offset can be used to create artificial pagination
     - Store current length, offset by that to go to next page.
