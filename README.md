@@ -65,6 +65,7 @@ Playback
 
 - Play/Pause: p
 - Skip: n
+- Toggle shuffle: s
 
 Jukebox
 

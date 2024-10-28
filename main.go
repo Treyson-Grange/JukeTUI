@@ -27,6 +27,7 @@ var keybinds = map[string]string{
 	"Quit":           "q",
 	"Play/Pause":     "p",
 	"Skip":           "n",
+	"Shuffle":        "s",
 	"Recommendation": "r",
 	"Add to Queue":   "c",
 	"Cursor Up":      "up",
@@ -66,6 +67,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
+			return m, handleFetchPlayback(m.token)
+		
+		case keybinds["Shuffle"]:
+			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
 			return m, handleFetchPlayback(m.token)
 
 		case keybinds["Recommendation"]:
