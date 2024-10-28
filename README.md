@@ -43,6 +43,34 @@ SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
 - Spotify Preference will alter what is displayed in the cursor section. Your saved albums or your saved playlists.
   - (This feature might turn into 'tabs' eventually, so we can have both)
 
+## Use
+
+To run JukeTUI, simply run `go run .`.
+
+Configurable keybinds are on the way, but for now run `go run . -h` to see the keybinds, or see the reference below
+
+### Keybinds
+
+General
+
+- Quit: q
+
+Library
+
+- Navigate Library: Up/Down arrows
+- Change Library page: Left/Right arrows
+- Play selected library item: Enter
+
+Playback
+
+- Play/Pause: p
+- Skip: n
+
+Jukebox
+
+- Get reccomendation: r
+- Add reccomendation to queue: c
+
 ## Known Issues
 
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)

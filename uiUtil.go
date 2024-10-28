@@ -42,7 +42,7 @@ func msToMinSec(ms int) string {
 }
 
 const SPOTIFY_GREEN = "#1DB954"
-const UI_LIBRARY_SPACE = 8 // Space to subtract from total to get library space
+const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
 const CHARACTERS = 6       // Characters we have to account for when truncating
 
 // Album Cover Functionality

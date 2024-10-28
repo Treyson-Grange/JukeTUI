@@ -201,23 +201,9 @@ func (m Model) View() string {
 	)
 }
 
-// Schedule the next fetch of the playback state.
-func scheduleNextFetch(d time.Duration) tea.Cmd {
-	return func() tea.Msg {
-		time.Sleep(d)
-		return playbackMsg{}
-	}
-}
-
-// Schedule the next increment of the progress bar.
-func scheduleProgressInc(d time.Duration) tea.Cmd {
-	return func() tea.Msg {
-		time.Sleep(d)
-		return progressMsg{}
-	}
-}
-
 func main() {
+	checkArguments()
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
