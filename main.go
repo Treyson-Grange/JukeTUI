@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -38,11 +39,11 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "Q":
+		switch strings.ToLower(msg.String()) {
+		case "q":
 			return m, tea.Quit
 
-		case "p", "P":
+		case "p":
 			if m.state.IsPlaying {
 				handleGenericPut("/me/player/pause", m.token, nil, nil)
 			} else {
@@ -50,17 +51,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, handleFetchPlayback(m.token)
 
-		case "n", "N":
+		case "n":
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, handleFetchPlayback(m.token)
 
-		case "r", "R":
+		case "r":
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			m.image = makeNewImage(m.reccomendation.Tracks[2].Album.Image[0].URL)
 			return m, handleFetchPlayback(m.token)
 
-		case "c", "C":
+		case "c":
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
