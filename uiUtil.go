@@ -14,6 +14,10 @@ import (
 	"golang.org/x/image/draw"
 )
 
+const SPOTIFY_GREEN = "#1DB954"
+const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
+const CHARACTERS = 6       // Characters we have to account for when truncating
+
 var (
 	boxStyle = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
@@ -25,6 +29,8 @@ var (
 			Padding(0).Align(lipgloss.Left)
 )
 
+// Text formatting functions
+
 // Truncate a string to fit any width
 func truncate(str string, width int) string {
 	if len(str) > width {
@@ -35,15 +41,17 @@ func truncate(str string, width int) string {
 	return str
 }
 
+// Wrap a string in brackets
+func bracketWrap(str string) string {
+	return fmt.Sprintf(" [ %s ] ", str)
+}
+
+
 // Turn ms to 5:30 format
 func msToMinSec(ms int) string {
 	sec := ms / 1000
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
-
-const SPOTIFY_GREEN = "#1DB954"
-const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
-const CHARACTERS = 6       // Characters we have to account for when truncating
 
 // Album Cover Functionality
 
@@ -107,12 +115,8 @@ func makeNewImage(url string) string {
 // UI Elements
 
 // Get the UI elements for display
-// Returns the library text, playback text, and recommendation details
 func getUiElements(m Model, boxWidth int) (string, string, string) {
-	libText := getLibText(m, boxWidth)
-	playback := getPlayBack(m)
-	reccDetails := getReccDetails(m)
-	return libText, playback, reccDetails
+	return getLibText(m, boxWidth), getPlayBack(m), getReccDetails(m)
 }
 
 // Get the library text for display
@@ -121,8 +125,7 @@ func getLibText(m Model, boxWidth int) string {
 	page := m.offset / (m.height - UI_LIBRARY_SPACE)
 	totalPage := m.apiTotal / (m.height - UI_LIBRARY_SPACE)
 	if m.libraryList == nil {
-		libText += "Loading Library Data..."
-		return libText
+		return "Loading Library Data..."
 	}
 	libText += fmt.Sprintf("Page %d of %d", page+1, totalPage+1)
 	if m.loading {
@@ -157,13 +160,16 @@ func getPlayBack(m Model) string {
 	if m.state.IsPlaying {
 		status = "▮▮"
 	}
-	playback := ""
-	if m.state.Item.Artists != nil {
-		playback = "🎵 [ " + m.state.Item.Name + " | " + m.state.Item.Artists[0].Name + " ]  " + lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status) + "  [ " + msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs) + " ]"
-	} else {
-		playback = "No Playback Data. Please start a playback session on your device"
+	shuffle := "!Shuffle"
+	if m.state.ShuffleState {
+		shuffle = "Shuffle"
 	}
-	return playback
+	
+	if m.state.Item.Artists != nil {
+		return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) + lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status) + bracketWrap(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)) + shuffle
+	} else {
+		return "No Playback Data. Please start a playback session on your device"
+	}
 }
 
 // Get the reccomendation details for display
