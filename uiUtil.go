@@ -166,7 +166,7 @@ func getPlayBack(m Model) string {
 	}
 	
 	if m.state.Item.Artists != nil {
-		return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) + lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status) + bracketWrap(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)) + shuffle
+		return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
 	} else {
 		return "No Playback Data. Please start a playback session on your device"
 	}
@@ -174,10 +174,10 @@ func getPlayBack(m Model) string {
 
 // Get the reccomendation details for display
 func getReccDetails(m Model) string {
-	recommendationDetails := "Press '" + keybinds["Recommendation"] + "' for a recommendation!\n\n\n" + m.image + "\n"
+	recommendationDetails := "Press '" + keybinds["Recommendation"] + "' for a recommendation!\n\n" + m.image + "\n"
 	if len(m.reccomendation.Tracks) > 0 {
 		recommendationDetails += fmt.Sprintf(
-			"Recommendation: %s - %s\n '%s' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, keybinds["Add to Queue"],
+			"%s - %s\n '%s' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, keybinds["Add to Queue"],
 		)
 	}
 	return recommendationDetails
