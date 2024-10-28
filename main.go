@@ -78,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
-			m.image = makeNewImage(m.state.Item.Album.Images[0].URL)
+			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
 			return m, handleFetchPlayback(m.token)
 
 		case keybinds["Cursor Up"]:
@@ -129,7 +129,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case PlaybackState:
 		if len(msg.Item.Album.Images) > 0 {
-			if m.state.Item.Album.Name != msg.Item.Album.Name {
+			if m.state.Item.Name != msg.Item.Name {
 				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
 			}
 		}
