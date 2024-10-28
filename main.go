@@ -23,6 +23,19 @@ func initialModel(token, listDetail string, height int) Model {
 	}
 }
 
+var keybinds = map[string]string{
+	"Quit":           "q",
+	"Play/Pause":     "p",
+	"Skip":           "n",
+	"Recommendation": "r",
+	"Add to Queue":   "c",
+	"Cursor Up":      "up",
+	"Cursor Down":    "down",
+	"Next Page":      "right",
+	"Previous Page":  "left",
+	"Select":         "enter",
+}
+
 func (m Model) Init() tea.Cmd {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
@@ -40,10 +53,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch strings.ToLower(msg.String()) {
-		case "q":
+		case keybinds["Quit"]:
 			return m, tea.Quit
 
-		case "p":
+		case keybinds["Play/Pause"]:
 			if m.state.IsPlaying {
 				handleGenericPut("/me/player/pause", m.token, nil, nil)
 			} else {
@@ -51,38 +64,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, handleFetchPlayback(m.token)
 
-		case "n":
+		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, handleFetchPlayback(m.token)
 
-		case "r":
+		case keybinds["Recommendation"]:
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
-			m.image = makeNewImage(m.reccomendation.Tracks[2].Album.Image[0].URL)
+			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
 			return m, handleFetchPlayback(m.token)
 
-		case "c":
+		case keybinds["Add to Queue"]:
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
-			m.image = makeNewImage(m.state.Item.Album.Images[2].URL)
+			m.image = makeNewImage(m.state.Item.Album.Images[0].URL)
 			return m, handleFetchPlayback(m.token)
 
-		case "up":
+		case keybinds["Cursor Up"]:
 			if m.cursor > 0 {
 				m.cursor--
 			} else {
 				m.cursor = len(m.libraryList) - 1
 			}
 
-		case "down":
+		case keybinds["Cursor Down"]:
 			if m.cursor < len(m.libraryList)-1 {
 				m.cursor++
 			} else {
 				m.cursor = 0
 			}
 
-		case "right":
+		case keybinds["Next Page"]:
 			m.loading = true
 			if m.offset+m.height-10 < m.apiTotal {
 				m.offset += m.height - UI_LIBRARY_SPACE
@@ -91,7 +104,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, handleFetchLibrary(m.token, m.listDetail, m.height-10, m.offset)
 
-		case "left":
+		case keybinds["Previous Page"]:
 			m.loading = true
 			if m.offset > m.height-10 {
 				m.offset -= m.height - UI_LIBRARY_SPACE
@@ -100,7 +113,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, handleFetchLibrary(m.token, m.listDetail, m.height-10, m.offset)
 
-		case "enter":
+		case keybinds["Select"]:
 			if m.state.IsPlaying {
 				if m.libraryList != nil {
 					if m.listDetail == "album" {
@@ -117,7 +130,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case PlaybackState:
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Album.Name != msg.Item.Album.Name {
-				m.image = makeNewImage(msg.Item.Album.Images[2].URL)
+				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
 			}
 		}
 		m.state = msg
@@ -221,8 +234,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get token: %v", err)
 	}
-	fmt.Println("Login successful! Access token retrieved.")
-	fmt.Println("Press 'p' to Play/Pause, 'n' to Skip, 'q' to Quit")
+	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {

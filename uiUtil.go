@@ -168,10 +168,10 @@ func getPlayBack(m Model) string {
 
 // Get the reccomendation details for display
 func getReccDetails(m Model) string {
-	recommendationDetails := "Press 'r' for a recommendation!\n\n\n" + m.image + "\n"
+	recommendationDetails := "Press '" + keybinds["Recommendation"] + "' for a recommendation!\n\n\n" + m.image + "\n"
 	if len(m.reccomendation.Tracks) > 0 {
 		recommendationDetails += fmt.Sprintf(
-			"Recommendation: %s - %s\n 'c' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name,
+			"Recommendation: %s - %s\n '%s' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, keybinds["Add to Queue"],
 		)
 	}
 	return recommendationDetails
