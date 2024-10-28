@@ -2,6 +2,8 @@
 
 JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and receive music recommendations through an intuitive jukebox system.
 
+I need your help! If you use windows or mac, please do some basic testing. I only run linux, and have no way to test on these operating systems. Open an issue or make a pull request if you find an issue.
+
 ### Features:
 
 - Jukebox: Get tailored song recommendations based on your currently playing track and easily queue songs for seamless listening.
@@ -105,3 +107,15 @@ If not, it's a stretch goal.
     - Total pages = total playlists or albums / pageSize.
     - (change library to have header, say "\_\_\_'s Albums/Playlists | Page 2/6")
     - Store the next call, so there is no wait.
+
+- [x] Device rememberance system
+
+  - Currently when I pause playback on JukeTUI, and playback is streaming from my phone, it enters the "no playback" state.
+  - If we can remember our device ID, and store it, on un pause, we can call the play function with our stored device
+  - Need to check if we are playbacking on a different device, so that when we replay, we aren't playing it on the laptop when we last played on phone.
+
+- [x] Visual Queue
+  - I want to split the jukebox horizontally, and show whats playing (album / playlist) and what track it next
+  - This means we will have to shrink the album cover a bit, or just get rid of some white space when necessary.
+  - Title of whats playing followed by 3 lines of queue items. Any more than that isn't super necesssary
+  - Would update on playback update, and on skip, and on add to queue.
