@@ -77,6 +77,8 @@ Jukebox
 - [ ] Emojis with 2 or 4 runes screw up our lipgloss formatting, lipgloss is aware of this issue, see [here](https://github.com/charmbracelet/lipgloss/issues/55)
 - [ ] On window resize, UI breaks. (sometimes)
 - [ ] Spotify Freemium does not functon with this app.
+- [ ] There are no checks for rate limiting (429)
+- [ ] With new 10 second interval, app keeps counting past its total time, until it gets that request.
 
 ## IDEAS
 
