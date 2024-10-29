@@ -46,7 +46,6 @@ func bracketWrap(str string) string {
 	return fmt.Sprintf(" [ %s ] ", str)
 }
 
-
 // Turn ms to 5:30 format
 func msToMinSec(ms int) string {
 	sec := ms / 1000
@@ -164,9 +163,9 @@ func getPlayBack(m Model) string {
 	if m.state.ShuffleState {
 		shuffle = "Shuffle"
 	}
-	
+
 	if m.state.Item.Artists != nil {
-		return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
+		return bracketWrap(m.state.Item.Name+" | "+m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs)+" / "+msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
 	} else {
 		return "No Playback Data. Please start a playback session on your device"
 	}

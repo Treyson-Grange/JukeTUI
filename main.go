@@ -15,11 +15,12 @@ import (
 	"golang.org/x/term"
 )
 
-func initialModel(token, listDetail string, height int) Model {
+func initialModel(token, listDetail string, height int, favorites []LibraryFavorite) Model {
 	return Model{
 		token:      token,
 		listDetail: listDetail,
 		height:     height,
+		favorites:  favorites,
 	}
 }
 
@@ -46,7 +47,7 @@ func (m Model) Init() tea.Cmd {
 		handleFetchPlayback(m.token),
 		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
-		handleFetchLibrary(m.token, m.listDetail, height-10, 0),
+		handleFetchLibrary(m.token, m.listDetail, height-9, 0),
 	)
 }
 
@@ -68,7 +69,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, handleFetchPlayback(m.token)
-		
+
 		case keybinds["Shuffle"]:
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
 			return m, handleFetchPlayback(m.token)
@@ -85,6 +86,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
 			return m, handleFetchPlayback(m.token)
+
+		case "f":
+			if m.libraryList != nil {
+				newFav := LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri}
+				if m.listDetail == "album" {
+					writeJSONFile("favorites/albums.json", newFav)
+				} else {
+					writeJSONFile("favorites/playlists.json", newFav)
+				}
+			}
 
 		case keybinds["Cursor Up"]:
 			if m.cursor > 0 {
@@ -151,6 +162,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case SpotifyAlbum:
 		m.libraryList = nil
+		for _, album := range m.favorites {
+			m.libraryList = append(m.libraryList, LibraryItem{name: album.Title, artist: album.Author, uri: album.URI})
+		}
 		for _, album := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, artist: album.Album.Artists[0].Name, uri: album.Album.URI})
 			m.apiTotal = msg.Total
@@ -232,7 +246,9 @@ func main() {
 		log.Fatalf("Failed to get terminal size: %v", err)
 	}
 
-	model := initialModel(token.AccessToken, listDetail, height)
+	favorites := readJSON("favorites/albums.json")
+
+	model := initialModel(token.AccessToken, listDetail, height, favorites)
 	model.refreshToken = token.RefreshToken
 	model.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 

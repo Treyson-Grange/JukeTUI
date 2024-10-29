@@ -55,6 +55,9 @@ type Model struct {
 
 	// Total Library Items
 	apiTotal int
+
+	// Favorites list
+	favorites []LibraryFavorite
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -178,4 +181,10 @@ type LibraryItem struct {
 	name   string
 	artist string
 	uri    string
+}
+
+type LibraryFavorite struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	URI    string `json:"URI"`
 }
