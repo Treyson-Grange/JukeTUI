@@ -37,6 +37,8 @@ var keybinds = map[string]string{
 	"Select":         "enter",
 }
 
+const FETCH_TIMER = 10
+
 func (m Model) Init() tea.Cmd {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
@@ -68,7 +70,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
 			return m, handleFetchPlayback(m.token)
-		
+
 		case keybinds["Shuffle"]:
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
 			return m, handleFetchPlayback(m.token)
@@ -142,7 +144,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if math.Abs(float64(m.progressMs-msg.ProgressMs)) > 1000 { // Don't bother unless we are more then a second off
 			m.progressMs = msg.ProgressMs
 		}
-		return m, tea.Batch(scheduleNextFetch(3*time.Second), CheckTokenExpiryCmd(m))
+		return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m))
 
 	case SpotifyTokenResponse:
 		m.token = msg.AccessToken
@@ -168,7 +170,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case error:
 		m.errMsg = msg.Error()
 		m.loading = false
-		return m, scheduleNextFetch(3 * time.Second)
+		return m, scheduleNextFetch(FETCH_TIMER * time.Second)
 
 	case playbackMsg:
 		return m, handleFetchPlayback(m.token)
