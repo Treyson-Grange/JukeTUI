@@ -79,6 +79,8 @@ Jukebox
 - [ ] Spotify Freemium does not functon with this app.
 - [ ] There are no checks for rate limiting (429)
 - [ ] With new 10 second interval, app keeps counting past its total time, until it gets that request.
+- [ ] When titles are too long, playback bar breaks. (just need to truncate first box when necessary)
+- [ ] When you leave it running, and open on a new computer, it comes upon `429` errors much more. Ruining playback and overall app functionality
 
 ## IDEAS
 

@@ -179,7 +179,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.state.IsPlaying {
 			m.progressMs += 1000
 		}
-		errorLogger.Println(m.state.Item.DurationMs - m.progressMs)
 		if m.state.Item.DurationMs-m.progressMs < 2000 {
 			return m, tea.Batch(scheduleProgressInc(1*time.Second), handleFetchPlayback(m.token))
 		}
