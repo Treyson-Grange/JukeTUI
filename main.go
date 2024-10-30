@@ -37,6 +37,7 @@ var keybinds = map[string]string{
 	"Select":         "enter",
 }
 
+// spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
 const FETCH_TIMER = 1
 
 func (m Model) Init() tea.Cmd {
@@ -179,7 +180,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.state.IsPlaying {
 			m.progressMs += 1000
 			if m.state.Item.DurationMs-m.progressMs < 2000 {
-				return m, tea.Batch(scheduleProgressInc(1*time.Second), handleFetchPlayback(m.token))
+				return m, tea.Batch(scheduleProgressInc(1 * time.Second))
 			}
 		}
 
