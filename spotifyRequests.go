@@ -74,7 +74,7 @@ func genericRequest[T any](method, endpoint, accessToken string, queryParams, bo
 			return result, resp.StatusCode, err
 		}
 	}
-
+	infoLogger.Println(fmt.Sprintf("Successful %s %s %d", method, endpoint, resp.StatusCode))
 	return result, resp.StatusCode, nil
 }
 

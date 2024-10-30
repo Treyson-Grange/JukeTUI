@@ -178,10 +178,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case progressMsg:
 		if m.state.IsPlaying {
 			m.progressMs += 1000
+			if m.state.Item.DurationMs-m.progressMs < 2000 {
+				infoLogger.Println("We are scheduling a fetch for the next song")
+				return m, tea.Batch(scheduleProgressInc(1*time.Second), handleFetchPlayback(m.token))
+			}
 		}
-		if m.state.Item.DurationMs-m.progressMs < 2000 {
-			return m, tea.Batch(scheduleProgressInc(1*time.Second), handleFetchPlayback(m.token))
-		}
+
 		return m, scheduleProgressInc(1 * time.Second)
 	}
 

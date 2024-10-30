@@ -28,7 +28,6 @@ func scheduleProgressInc(d time.Duration) tea.Cmd {
 	}
 }
 
-
 // Check if the user has passed in any arguments
 func checkArguments() {
 	if len(os.Args) > 1 {
