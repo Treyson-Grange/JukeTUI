@@ -82,7 +82,6 @@ func handleGenericPost(endpoint, accessToken string, queryParams, bodyArgs map[s
 // - The playback state.
 func handleFetchPlayback(token string) tea.Cmd {
 	return func() tea.Msg {
-		infoLogger.Println("Fetching playback state")
 		state := handleGenericFetch[PlaybackState]("/me/player", token, nil, nil)
 		return state
 	}

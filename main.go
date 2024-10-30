@@ -37,7 +37,7 @@ var keybinds = map[string]string{
 	"Select":         "enter",
 }
 
-const FETCH_TIMER = 10
+const FETCH_TIMER = 1
 
 func (m Model) Init() tea.Cmd {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
@@ -65,28 +65,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				handleGenericPut("/me/player/play", m.token, nil, map[string]string{"device_id": m.state.Device.ID})
 			}
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Shuffle"]:
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Recommendation"]:
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Add to Queue"]:
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
 			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Cursor Up"]:
 			if m.cursor > 0 {
@@ -129,7 +129,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
 					}
 					handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
-					return m, handleFetchPlayback(m.token)
+					return m, nil
 				}
 			}
 		}
@@ -179,7 +179,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.state.IsPlaying {
 			m.progressMs += 1000
 			if m.state.Item.DurationMs-m.progressMs < 2000 {
-				infoLogger.Println("We are scheduling a fetch for the next song")
 				return m, tea.Batch(scheduleProgressInc(1*time.Second), handleFetchPlayback(m.token))
 			}
 		}
