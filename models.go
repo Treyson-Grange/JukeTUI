@@ -153,15 +153,19 @@ type PlaybackState struct {
 // SpotifyAlbum struct for parsing the albums response.
 type SpotifyAlbum struct {
 	Items []struct {
-		Album struct {
-			Name    string `json:"name"`
-			URI     string `json:"uri"`
-			Artists []struct {
-				Name string `json:"name"`
-			}
-		}
+		SpotifyAlbumItem
 	}
 	Total int `json:"total"`
+}
+
+type SpotifyAlbumItem struct {
+	Album struct {
+		Name    string `json:"name"`
+		URI     string `json:"uri"`
+		Artists []struct {
+			Name string `json:"name"`
+		}
+	}
 }
 
 // SpotifyPlaylist struct for parsing the playlists response.

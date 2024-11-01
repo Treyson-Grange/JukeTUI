@@ -15,7 +15,12 @@ import (
 	"golang.org/x/term"
 )
 
-func initialModel(token, listDetail string, height int, favorites []LibraryFavorite) Model {
+func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		log.Fatalf("Failed to get terminal size: %v", err)
+	}
+
 	return Model{
 		token:      token,
 		listDetail: listDetail,
@@ -39,15 +44,11 @@ var keybinds = map[string]string{
 }
 
 func (m Model) Init() tea.Cmd {
-	_, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		log.Fatalf("Failed to get terminal size: %v", err)
-	}
 	return tea.Batch(
 		handleFetchPlayback(m.token),
 		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
-		handleFetchLibrary(m.token, m.listDetail, height-LIBRARY_SPACING-len(m.favorites), 0),
+		handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), 0),
 	)
 }
 
@@ -92,13 +93,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				for i, fav := range m.favorites {
 					if fav.URI == m.libraryList[m.cursor].uri {
 						m.favorites = append(m.favorites[:i], m.favorites[i+1:]...)
-						errorLogger.Println(removeFromJSON("favorites/albums.json", LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri}))
-						return m, nil
+						removeFromJSON("favorites/albums.json", fav)
+						m.favorites = readJSON("favorites/albums.json")
+						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 					}
 				}
-					m.favorites = append(m.favorites, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
-					writeJSONFile("favorites/albums.json", LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
+				writeJSONFile("favorites/albums.json", LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
+				m.favorites = append(m.favorites, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 			}
+			m.favorites = readJSON("favorites/albums.json")
+			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
 		case keybinds["Cursor Up"]:
 			if m.cursor > 0 {
@@ -121,7 +125,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.offset = 0
 			}
-			return m, handleFetchLibrary(m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
 		case keybinds["Previous Page"]:
 			m.loading = true
@@ -130,7 +134,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.offset = 0
 			}
-			return m, handleFetchLibrary(m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
 		case keybinds["Select"]:
 			if m.state.IsPlaying {
@@ -244,14 +248,9 @@ func main() {
 	}
 	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
-	_, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		log.Fatalf("Failed to get terminal size: %v", err)
-	}
-
 	favorites := readJSON("favorites/albums.json")
 
-	model := initialModel(token.AccessToken, listDetail, height, favorites)
+	model := initialModel(token.AccessToken, listDetail, favorites)
 	model.refreshToken = token.RefreshToken
 	model.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 
