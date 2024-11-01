@@ -125,7 +125,7 @@ func getLibText(m Model, boxWidth int) string {
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", m.offset / (m.height - UI_LIBRARY_SPACE) + 1, m.apiTotal / (m.height - UI_LIBRARY_SPACE) + 1)
+	libText += fmt.Sprintf("Page %d of %d", m.offset / (m.height - UI_LIBRARY_SPACE - len(m.favorites)) + 1, m.apiTotal / (m.height - UI_LIBRARY_SPACE) + 1)
 	if m.loading {
 		libText += "  Loading..."
 	}

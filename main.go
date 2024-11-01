@@ -79,9 +79,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case keybinds["Recommendation"]:
-			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
-			m.reccomendation = data
-			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
+			if m.state.Item.ID != "" {
+				data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
+				m.reccomendation = data
+				m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
+			}
 			return m, nil
 
 		case keybinds["Add to Queue"]:
@@ -134,7 +136,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Previous Page"]:
 			m.loading = true
-			if m.offset > 0 {
+			page := m.offset / (m.height - (UI_LIBRARY_SPACE + len(m.favorites))) + 1
+			if page > 1 {
 				if m.offset == m.height-(UI_LIBRARY_SPACE+len(m.favorites)) {
 					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites))
 				} else {
