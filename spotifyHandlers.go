@@ -96,14 +96,50 @@ func handleFetchPlayback(token string) tea.Cmd {
 //
 // Returns:
 // - The fetched library.
-func handleFetchLibrary(token string, listDetail string, height, offset int) tea.Cmd {
+func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail string, height, offset int) tea.Cmd {
 	return func() tea.Msg {
 		height = int(math.Min(float64(height), 50))
 		if listDetail == "album" {
 			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
+			removed := 0
+			for i := 0; i < len(albums.Items); i++ {
+				for _, favorite := range favorites {
+					if albums.Items[i].Album.URI == favorite.URI {
+						removed++
+
+					}
+				}
+			}
+			albums = handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height + removed ), "offset": fmt.Sprintf("%d", offset)}, nil)
+			for i := 0; i < len(albums.Items); i++ {
+				for _, favorite := range favorites {
+					if albums.Items[i].Album.URI == favorite.URI {
+						errorLogger.Println("Found favorite" + favorite.Title + " in library")
+						albums.Items = append(albums.Items[:i], albums.Items[i+1:]...)
+					}
+				}
+			}
 			return albums
 		} else {
 			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
+			removed := 0
+			for i := 0; i < len(playlist.Items); i++ {
+				for _, favorite := range favorites {
+					if playlist.Items[i].URI == favorite.URI {
+						removed++
+
+					}
+				}
+			}
+			playlist = handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height + removed), "offset": fmt.Sprintf("%d", offset)}, nil)
+			for i := 0; i < len(playlist.Items); i++ {
+				for _, favorite := range favorites {
+					if playlist.Items[i].URI == favorite.URI {
+						playlist.Items = append(playlist.Items[:i], playlist.Items[i+1:]...)
+
+					}
+				}
+			}
 			return playlist
 		}
 	}

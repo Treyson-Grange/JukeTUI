@@ -17,6 +17,7 @@ import (
 const SPOTIFY_GREEN = "#1DB954"
 const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
 const CHARACTERS = 6       // Characters we have to account for when truncating
+const LIBRARY_SPACING = 10
 
 var (
 	boxStyle = lipgloss.NewStyle().
@@ -45,7 +46,6 @@ func truncate(str string, width int) string {
 func bracketWrap(str string) string {
 	return fmt.Sprintf(" [ %s ] ", str)
 }
-
 
 // Turn ms to 5:30 format
 func msToMinSec(ms int) string {
@@ -122,12 +122,10 @@ func getUiElements(m Model, boxWidth int) (string, string, string) {
 // Get the library text for display
 func getLibText(m Model, boxWidth int) string {
 	libText := ""
-	page := m.offset / (m.height - UI_LIBRARY_SPACE)
-	totalPage := m.apiTotal / (m.height - UI_LIBRARY_SPACE)
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", page+1, totalPage+1)
+	libText += fmt.Sprintf("Page %d of %d", m.offset / (m.height - UI_LIBRARY_SPACE) + 1, m.apiTotal / (m.height - UI_LIBRARY_SPACE) + 1)
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -139,16 +137,19 @@ func getLibText(m Model, boxWidth int) string {
 					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist: item.artist,
 					uri:    item.uri,
+					favorite: item.favorite,
 				}
 			} else {
 				item = LibraryItem{
 					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
 					artist: item.artist,
 					uri:    item.uri,
+					favorite: item.favorite,
 				}
 			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
-			libText += fmt.Sprintf("%s - %s%s\n", item.name, item.artist, play)
+			favorite := map[bool]string{true: "♥ ", false: "  "}[item.favorite]
+			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, item.name, item.artist, play)
 		}
 	}
 	return libText
@@ -164,9 +165,9 @@ func getPlayBack(m Model) string {
 	if m.state.ShuffleState {
 		shuffle = "Shuffle"
 	}
-	
+
 	if m.state.Item.Artists != nil {
-		return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
+		return bracketWrap(m.state.Item.Name+" | "+m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs)+" / "+msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
 	} else {
 		return "No Playback Data. Please start a playback session on your device"
 	}

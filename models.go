@@ -55,6 +55,9 @@ type Model struct {
 
 	// Total Library Items
 	apiTotal int
+
+	// Favorites list
+	favorites []LibraryFavorite
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -150,15 +153,19 @@ type PlaybackState struct {
 // SpotifyAlbum struct for parsing the albums response.
 type SpotifyAlbum struct {
 	Items []struct {
-		Album struct {
-			Name    string `json:"name"`
-			URI     string `json:"uri"`
-			Artists []struct {
-				Name string `json:"name"`
-			}
-		}
+		SpotifyAlbumItem
 	}
 	Total int `json:"total"`
+}
+
+type SpotifyAlbumItem struct {
+	Album struct {
+		Name    string `json:"name"`
+		URI     string `json:"uri"`
+		Artists []struct {
+			Name string `json:"name"`
+		}
+	}
 }
 
 // SpotifyPlaylist struct for parsing the playlists response.
@@ -178,4 +185,11 @@ type LibraryItem struct {
 	name   string
 	artist string
 	uri    string
+	favorite bool
+}
+
+type LibraryFavorite struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	URI    string `json:"URI"`
 }
