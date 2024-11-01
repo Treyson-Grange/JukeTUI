@@ -118,9 +118,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Next Page"]:
 			m.loading = true
-			page := m.offset / (m.height - UI_LIBRARY_SPACE) + 1
 			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
-				m.offset += m.height - UI_LIBRARY_SPACE - page * (len(m.favorites)) + 1
+				if m.offset == 0 {// IDK why this is necessary, but its the only way i got it working.
+					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites))
+				} else {
+					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
+				}				
 			} else {
 				m.offset = 0
 			}
@@ -128,11 +131,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Previous Page"]:
 			m.loading = true
-			page := m.offset / (m.height - UI_LIBRARY_SPACE) + 1
-			if m.offset > m.height-LIBRARY_SPACING-len(m.favorites) {
-				m.offset -= m.height - UI_LIBRARY_SPACE - page * (len(m.favorites)) + 1
+			if m.offset > 0 {
+				if m.offset == m.height-(UI_LIBRARY_SPACE+len(m.favorites)) {
+					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites))
+				} else {
+					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
+				}
 			} else {
-				m.offset = 0
+				m.offset = m.apiTotal - (m.apiTotal % (m.height - (UI_LIBRARY_SPACE + len(m.favorites))))
 			}
 			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
