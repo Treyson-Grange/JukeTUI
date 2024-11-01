@@ -17,6 +17,7 @@ import (
 const SPOTIFY_GREEN = "#1DB954"
 const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
 const CHARACTERS = 6       // Characters we have to account for when truncating
+const LIBRARY_SPACING = 10
 
 var (
 	boxStyle = lipgloss.NewStyle().
@@ -138,16 +139,19 @@ func getLibText(m Model, boxWidth int) string {
 					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist: item.artist,
 					uri:    item.uri,
+					favorite: item.favorite,
 				}
 			} else {
 				item = LibraryItem{
 					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
 					artist: item.artist,
 					uri:    item.uri,
+					favorite: item.favorite,
 				}
 			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
-			libText += fmt.Sprintf("%s - %s%s\n", item.name, item.artist, play)
+			favorite := map[bool]string{true: " ♥", false: ""}[item.favorite]
+			libText += fmt.Sprintf("%s - %s%s%s\n", item.name, item.artist, play, favorite)
 		}
 	}
 	return libText

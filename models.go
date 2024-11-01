@@ -181,6 +181,7 @@ type LibraryItem struct {
 	name   string
 	artist string
 	uri    string
+	favorite bool
 }
 
 type LibraryFavorite struct {

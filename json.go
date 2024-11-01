@@ -63,3 +63,44 @@ func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
 
 	return true
 }
+
+
+func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
+	// Read the existing JSON file
+	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return false
+	}
+
+	// Unmarshal JSON into a slice of LibraryFavorite
+	var favorites []LibraryFavorite
+	if err := json.Unmarshal(fileData, &favorites); err != nil {
+		return false
+	}
+
+	// Filter out the item matching the provided favorite
+	var updatedFavorites []LibraryFavorite
+	for _, f := range favorites {
+		if f.Title != oldFavorite.Title || f.Author != oldFavorite.Author || f.URI != oldFavorite.URI {
+			updatedFavorites = append(updatedFavorites, f)
+		}
+	}
+
+	// Marshal the updated list back to JSON; set to [] if no favorites remain
+	var updatedData []byte
+	if len(updatedFavorites) == 0 {
+		updatedData = []byte("[]")
+	} else {
+		updatedData, err = json.MarshalIndent(updatedFavorites, "", "  ")
+		if err != nil {
+			return false
+		}
+	}
+
+	// Write the updated JSON back to the file
+	if err := os.WriteFile(filePath, updatedData, 0644); err != nil {
+		return false
+	}
+
+	return true
+}
