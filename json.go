@@ -12,21 +12,21 @@ import (
 // Specifically, it contains the functionality for reading and writing our favorite library items to a JSON file.
 // There will be 2 files. One for albums, one for playlists.
 
-func readJSON(filePath string) []LibraryFavorite {
+func readJSON(filePath string) ([]LibraryFavorite, bool) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		errorLogger.Println("Failed to opsen albums.json: ", err)
-		return nil
+		return nil, false
 	}
 	defer file.Close()
 
 	favorites := []LibraryFavorite{}
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&favorites); err != nil {
-		log.Fatal("Error while decoding JSON: ", err)
+		return nil, false
 	}
 
-	return favorites
+	return favorites, true
 }
 
 func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
@@ -102,5 +102,13 @@ func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
 		return false
 	}
 
+	return true
+}
+
+func createEmptyJSONFile(filePath string) bool {
+	emptyData := []byte("[]")
+	if err := os.WriteFile(filePath, emptyData, 0644); err != nil {
+		return false
+	}
 	return true
 }

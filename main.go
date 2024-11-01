@@ -93,13 +93,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.favorites != nil {
 				for _, fav := range m.favorites {
 					if fav.URI == m.libraryList[m.cursor].uri {
-						m.favorites = readJSON(file)
+						m.favorites, _ = readJSON(file)
 						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 					}
 				}
 				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 			}
-			m.favorites = readJSON(file)
+			m.favorites, _ = readJSON(file)
 			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
 		case keybinds["Cursor Up"]:
@@ -258,7 +258,12 @@ func main() {
 	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
 	
-	favorites := readJSON(fmt.Sprintf("favorites/%ss.json", listDetail))
+	favorites, success := readJSON(fmt.Sprintf("favorites/%ss.json", listDetail))
+	if !success {
+		fmt.Println("No favorites found. Creating new favorites file.")
+		createEmptyJSONFile(fmt.Sprintf("favorites/%ss.json", listDetail))
+	}
+
 
 	model := initialModel(token.AccessToken, listDetail, favorites)
 	model.refreshToken = token.RefreshToken
