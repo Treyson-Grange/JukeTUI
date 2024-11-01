@@ -43,6 +43,9 @@ var keybinds = map[string]string{
 	"Select":         "enter",
 }
 
+// spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
+const FETCH_TIMER = 1
+
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		handleFetchPlayback(m.token),
@@ -65,28 +68,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				handleGenericPut("/me/player/play", m.token, nil, map[string]string{"device_id": m.state.Device.ID})
 			}
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Skip"]:
 			handleGenericPost("/me/player/next", m.token, nil, nil)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Shuffle"]:
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Recommendation"]:
 			data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 			m.reccomendation = data
 			m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case keybinds["Add to Queue"]:
 			if len(m.reccomendation.Tracks) > 0 {
 				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
 			}
 			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
-			return m, handleFetchPlayback(m.token)
+			return m, nil
 
 		case "f":
 			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
@@ -151,7 +154,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": "true"}, nil)
 					}
 					handleGenericPut("/me/player/play", m.token, map[string]string{"device_id": m.state.Device.ID}, map[string]string{"context_uri": m.libraryList[m.cursor].uri})
-					return m, handleFetchPlayback(m.token)
+					return m, nil
 				}
 			}
 		}
@@ -166,7 +169,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if math.Abs(float64(m.progressMs-msg.ProgressMs)) > 1000 { // Don't bother unless we are more then a second off
 			m.progressMs = msg.ProgressMs
 		}
-		return m, tea.Batch(scheduleNextFetch(3*time.Second), CheckTokenExpiryCmd(m))
+		return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m))
 
 	case SpotifyTokenResponse:
 		m.token = msg.AccessToken
@@ -198,7 +201,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case error:
 		m.errMsg = msg.Error()
 		m.loading = false
-		return m, scheduleNextFetch(3 * time.Second)
+		return m, scheduleNextFetch(FETCH_TIMER * time.Second)
 
 	case playbackMsg:
 		return m, handleFetchPlayback(m.token)
@@ -206,7 +209,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case progressMsg:
 		if m.state.IsPlaying {
 			m.progressMs += 1000
+			if m.state.Item.DurationMs-m.progressMs < 2000 {
+				return m, tea.Batch(scheduleProgressInc(1 * time.Second))
+			}
 		}
+
 		return m, scheduleProgressInc(1 * time.Second)
 	}
 
