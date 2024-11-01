@@ -89,19 +89,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, handleFetchPlayback(m.token)
 
 		case "f":
+			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
 			if m.favorites != nil {
 				for i, fav := range m.favorites {
 					if fav.URI == m.libraryList[m.cursor].uri {
 						m.favorites = append(m.favorites[:i], m.favorites[i+1:]...)
-						removeFromJSON("favorites/albums.json", fav)
-						m.favorites = readJSON("favorites/albums.json")
+						removeFromJSON(file, fav)
+						m.favorites = readJSON(file)
 						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 					}
 				}
-				writeJSONFile("favorites/albums.json", LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
+				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 				m.favorites = append(m.favorites, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 			}
-			m.favorites = readJSON("favorites/albums.json")
+			m.favorites = readJSON(file)
 			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 
 		case keybinds["Cursor Up"]:
@@ -180,6 +181,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case SpotifyPlaylist:
 		m.libraryList = nil
+		for _, playlist := range m.favorites {
+			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Title, artist: playlist.Author, uri: playlist.URI, favorite: true})
+		}
 		for _, playlist := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Name, artist: playlist.Owner.DisplayName, uri: playlist.URI, favorite: false})
 			m.apiTotal = msg.Total
@@ -248,7 +252,8 @@ func main() {
 	}
 	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
-	favorites := readJSON("favorites/albums.json")
+	
+	favorites := readJSON(fmt.Sprintf("favorites/%ss.json", listDetail))
 
 	model := initialModel(token.AccessToken, listDetail, favorites)
 	model.refreshToken = token.RefreshToken

@@ -15,11 +15,6 @@
     "URI": "spotify:album:32ium7Cxb1Xwp2MLzH2459"
   },
   {
-    "title": "Bankrupt!",
-    "author": "Phoenix",
-    "URI": "spotify:album:1MJotRlrO8AFegESeJRuBV"
-  },
-  {
     "title": "SMILE! :D",
     "author": "Porter Robinson",
     "URI": "spotify:album:2iS4pBIiQf4sCTJLZ5n8dy"
@@ -33,5 +28,10 @@
     "title": "MOTOMAMI",
     "author": "ROSALÍA",
     "URI": "spotify:album:6jbtHi5R0jMXoliU2OS0lo"
+  },
+  {
+    "title": "Heaven knows",
+    "author": "PinkPantheress",
+    "URI": "spotify:album:2pOEFqvfxp5uUQ8vQEmVA0"
   }
 ]
