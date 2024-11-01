@@ -1,3 +1,5 @@
 .env
 JukeTUI
 *.log
+
+favorites/*.json
