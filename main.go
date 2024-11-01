@@ -91,16 +91,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "f":
 			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
 			if m.favorites != nil {
-				for i, fav := range m.favorites {
+				for _, fav := range m.favorites {
 					if fav.URI == m.libraryList[m.cursor].uri {
-						m.favorites = append(m.favorites[:i], m.favorites[i+1:]...)
-						removeFromJSON(file, fav)
 						m.favorites = readJSON(file)
 						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 					}
 				}
 				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
-				m.favorites = append(m.favorites, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 			}
 			m.favorites = readJSON(file)
 			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
@@ -121,8 +118,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Next Page"]:
 			m.loading = true
+			page := m.offset / (m.height - UI_LIBRARY_SPACE) + 1
 			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
-				m.offset += m.height - UI_LIBRARY_SPACE
+				m.offset += m.height - UI_LIBRARY_SPACE - page * (len(m.favorites)) + 1
 			} else {
 				m.offset = 0
 			}
@@ -130,8 +128,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Previous Page"]:
 			m.loading = true
+			page := m.offset / (m.height - UI_LIBRARY_SPACE) + 1
 			if m.offset > m.height-LIBRARY_SPACING-len(m.favorites) {
-				m.offset -= m.height - UI_LIBRARY_SPACE
+				m.offset -= m.height - UI_LIBRARY_SPACE - page * (len(m.favorites)) + 1
 			} else {
 				m.offset = 0
 			}

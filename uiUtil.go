@@ -122,12 +122,10 @@ func getUiElements(m Model, boxWidth int) (string, string, string) {
 // Get the library text for display
 func getLibText(m Model, boxWidth int) string {
 	libText := ""
-	page := m.offset / (m.height - UI_LIBRARY_SPACE)
-	totalPage := m.apiTotal / (m.height - UI_LIBRARY_SPACE)
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", page+1, totalPage+1)
+	libText += fmt.Sprintf("Page %d of %d", m.offset / (m.height - UI_LIBRARY_SPACE) + 1, m.apiTotal / (m.height - UI_LIBRARY_SPACE) + 1)
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -150,8 +148,8 @@ func getLibText(m Model, boxWidth int) string {
 				}
 			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
-			favorite := map[bool]string{true: " ♥", false: ""}[item.favorite]
-			libText += fmt.Sprintf("%s - %s%s%s\n", item.name, item.artist, play, favorite)
+			favorite := map[bool]string{true: "♥ ", false: "  "}[item.favorite]
+			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, item.name, item.artist, play)
 		}
 	}
 	return libText
