@@ -36,6 +36,7 @@ var keybinds = map[string]string{
 	"Shuffle":        "s",
 	"Recommendation": "r",
 	"Add to Queue":   "c",
+	"Favorites":      "f",
 	"Cursor Up":      "up",
 	"Cursor Down":    "down",
 	"Next Page":      "right",
@@ -93,11 +94,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
 			return m, nil
 
-		case "f":
+		case keybinds["Favorites"]:
 			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
 			if m.favorites != nil {
 				for _, fav := range m.favorites {
 					if fav.URI == m.libraryList[m.cursor].uri {
+						removeFromJSON(file, fav)
 						m.favorites, _ = readJSON(file)
 						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
 					}
@@ -124,11 +126,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keybinds["Next Page"]:
 			m.loading = true
 			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
-				if m.offset == 0 {// IDK why this is necessary, but its the only way i got it working.
+				if m.offset == 0 { // IDK why this is necessary, but its the only way i got it working.
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites))
 				} else {
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
-				}				
+				}
 			} else {
 				m.offset = 0
 			}
@@ -136,7 +138,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Previous Page"]:
 			m.loading = true
-			page := m.offset / (m.height - (UI_LIBRARY_SPACE + len(m.favorites))) + 1
+			page := m.offset/(m.height-(UI_LIBRARY_SPACE+len(m.favorites))) + 1
 			if page > 1 {
 				if m.offset == m.height-(UI_LIBRARY_SPACE+len(m.favorites)) {
 					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites))
@@ -267,13 +269,11 @@ func main() {
 	}
 	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
-	
 	favorites, success := readJSON(fmt.Sprintf("favorites/%ss.json", listDetail))
 	if !success {
 		fmt.Println("No favorites found. Creating new favorites file.")
 		createEmptyJSONFile(fmt.Sprintf("favorites/%ss.json", listDetail))
 	}
-
 
 	model := initialModel(token.AccessToken, listDetail, favorites)
 	model.refreshToken = token.RefreshToken

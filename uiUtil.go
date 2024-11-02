@@ -16,7 +16,7 @@ import (
 
 const SPOTIFY_GREEN = "#1DB954"
 const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
-const CHARACTERS = 6       // Characters we have to account for when truncating
+const CHARACTERS = 7       // Characters we have to account for when truncating
 const LIBRARY_SPACING = 10
 
 var (
@@ -125,7 +125,7 @@ func getLibText(m Model, boxWidth int) string {
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", m.offset / (m.height - UI_LIBRARY_SPACE - len(m.favorites)) + 1, m.apiTotal / (m.height - UI_LIBRARY_SPACE) + 1)
+	libText += fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE)+1)
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -134,16 +134,16 @@ func getLibText(m Model, boxWidth int) string {
 		for i, item := range m.libraryList {
 			if i == m.cursor {
 				item = LibraryItem{
-					name:   lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
-					artist: item.artist,
-					uri:    item.uri,
+					name:     lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
+					artist:   item.artist,
+					uri:      item.uri,
 					favorite: item.favorite,
 				}
 			} else {
 				item = LibraryItem{
-					name:   "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
-					artist: item.artist,
-					uri:    item.uri,
+					name:     "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
+					artist:   item.artist,
+					uri:      item.uri,
 					favorite: item.favorite,
 				}
 			}
