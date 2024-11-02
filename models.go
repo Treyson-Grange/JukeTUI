@@ -170,21 +170,23 @@ type SpotifyAlbumItem struct {
 
 // SpotifyPlaylist struct for parsing the playlists response.
 type SpotifyPlaylist struct {
-	Items []struct {
-		Name  string `json:"name"`
-		URI   string `json:"uri"`
-		Owner struct {
-			DisplayName string `json:"display_name"`
-		}
+	Items []SpotifyPlaylistItem `json:"items"`
+	Total int                   `json:"total"`
+}
+
+type SpotifyPlaylistItem struct {
+	Name  string `json:"name"`
+	URI   string `json:"uri"`
+	Owner struct {
+		DisplayName string `json:"display_name"`
 	}
-	Total int `json:"total"`
 }
 
 // LibraryItem struct for storing album/playlist information.
 type LibraryItem struct {
-	name   string
-	artist string
-	uri    string
+	name     string
+	artist   string
+	uri      string
 	favorite bool
 }
 

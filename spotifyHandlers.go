@@ -102,42 +102,43 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 		if listDetail == "album" {
 			albums := handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
 			removed := 0
-			for i := 0; i < len(albums.Items); i++ {
-				for _, favorite := range favorites {
-					if albums.Items[i].Album.URI == favorite.URI {
-						removed++
 
+			for _, item := range albums.Items {
+				for _, favorite := range favorites {
+					if item.Album.URI == favorite.URI {
+						removed++
 					}
 				}
 			}
 			albums = handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height+removed), "offset": fmt.Sprintf("%d", offset)}, nil)
-			for i := 0; i < len(albums.Items); i++ {
+			filteredItems := make([]struct{ SpotifyAlbumItem }, 0, len(albums.Items))
+			for _, item := range albums.Items {
+				isFavorite := false
 				for _, favorite := range favorites {
-					if albums.Items[i].Album.URI == favorite.URI {
-						albums.Items = append(albums.Items[:i], albums.Items[i+1:]...)
+					if item.Album.URI == favorite.URI {
+						isFavorite = true
+						break
 					}
 				}
+				if !isFavorite {
+					filteredItems = append(filteredItems, item) // Keep item
+				}
 			}
+			albums.Items = filteredItems
 			return albums
 		} else {
 			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height), "offset": fmt.Sprintf("%d", offset)}, nil)
-			removed := 0
-			for i := 0; i < len(playlist.Items); i++ {
-				for _, favorite := range favorites {
-					if playlist.Items[i].URI == favorite.URI {
-						removed++
-					}
+			filteredItems := make([]SpotifyPlaylistItem, 0, len(playlist.Items))
+			favoriteURIs := make(map[string]struct{})
+			for _, favorite := range favorites {
+				favoriteURIs[favorite.URI] = struct{}{}
+			}
+			for _, item := range playlist.Items {
+				if _, found := favoriteURIs[item.URI]; !found {
+					filteredItems = append(filteredItems, item) // Keep item if not a favorite
 				}
 			}
-			playlist = handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height+removed), "offset": fmt.Sprintf("%d", offset)}, nil)
-			for i := 0; i < len(playlist.Items); i++ {
-				for _, favorite := range favorites {
-					if playlist.Items[i].URI == favorite.URI {
-						playlist.Items = append(playlist.Items[:i], playlist.Items[i+1:]...)
-
-					}
-				}
-			}
+			playlist.Items = filteredItems
 			return playlist
 		}
 	}
