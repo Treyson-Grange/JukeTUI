@@ -29,20 +29,7 @@ func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 	}
 }
 
-var keybinds = map[string]string{
-	"Quit":           "q",
-	"Play/Pause":     "p",
-	"Skip":           "n",
-	"Shuffle":        "s",
-	"Recommendation": "r",
-	"Add to Queue":   "c",
-	"Favorites":      "f",
-	"Cursor Up":      "up",
-	"Cursor Down":    "down",
-	"Next Page":      "right",
-	"Previous Page":  "left",
-	"Select":         "enter",
-}
+var keybinds = map[string]string{}
 
 // spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
 const FETCH_TIMER = 1
@@ -260,6 +247,8 @@ func main() {
 	clientSecret := os.Getenv("SPOTIFY_SECRET")
 	listDetail := os.Getenv("SPOTIFY_PREFERENCE")
 
+	setKeybinds()
+
 	fmt.Println("Opening login page...")
 	OpenLoginPage(clientID)
 	code := GetCodeFromCallback()
@@ -282,5 +271,22 @@ func main() {
 	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
 		log.Fatalf("Error: %v", err)
+	}
+}
+
+func setKeybinds() {
+	keybinds = map[string]string{
+		"Quit":           queryEnv("QUIT", "q"),
+		"Play/Pause":     queryEnv("PLAYPAUSE", "p"),
+		"Skip":           queryEnv("SKIP", "n"),
+		"Shuffle":        queryEnv("SHUFFLE", "s"),
+		"Recommendation": queryEnv("RECOMMENDATION", "r"),
+		"Add to Queue":   queryEnv("ADDTOQUEUE", "c"),
+		"Favorites":      queryEnv("FAVORITES", "f"),
+		"Cursor Up":      "up",
+		"Cursor Down":    "down",
+		"Next Page":      "right",
+		"Previous Page":  "left",
+		"Select":         "enter",
 	}
 }

@@ -47,3 +47,11 @@ func checkArguments() {
 		}
 	}
 }
+
+// Query an environment variable, returning a default value if it is not set
+func queryEnv(envKey, defaultValue string) string {
+	if v := os.Getenv(envKey); v != "" {
+		return v
+	}
+	return defaultValue
+}

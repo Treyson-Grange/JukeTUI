@@ -110,11 +110,10 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 					}
 				}
 			}
-			albums = handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height + removed ), "offset": fmt.Sprintf("%d", offset)}, nil)
+			albums = handleGenericFetch[SpotifyAlbum]("/me/albums", token, map[string]string{"limit": fmt.Sprintf("%d", height+removed), "offset": fmt.Sprintf("%d", offset)}, nil)
 			for i := 0; i < len(albums.Items); i++ {
 				for _, favorite := range favorites {
 					if albums.Items[i].Album.URI == favorite.URI {
-						errorLogger.Println("Found favorite" + favorite.Title + " in library")
 						albums.Items = append(albums.Items[:i], albums.Items[i+1:]...)
 					}
 				}
@@ -127,11 +126,10 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 				for _, favorite := range favorites {
 					if playlist.Items[i].URI == favorite.URI {
 						removed++
-
 					}
 				}
 			}
-			playlist = handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height + removed), "offset": fmt.Sprintf("%d", offset)}, nil)
+			playlist = handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": fmt.Sprintf("%d", height+removed), "offset": fmt.Sprintf("%d", offset)}, nil)
 			for i := 0; i < len(playlist.Items); i++ {
 				for _, favorite := range favorites {
 					if playlist.Items[i].URI == favorite.URI {
