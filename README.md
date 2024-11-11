@@ -33,12 +33,13 @@ JukeTUI uses the Spotify Web API, which doesn't handle playback on its own. Ther
 - To set up your `.env`, copy `.env.example` into `.env`.
 
 ```
-SPOTIFY_ID={{ From the developer dashboard }}
-SPOTIFY_SECRET={{ From the developer dashboard }}
-SPOTIFY_PREFERENCE={{ Either 'album' or 'playlist' }}
+SPOTIFY_ID="{ From the developer dashboard }"
+SPOTIFY_SECRET="{ From the developer dashboard }"
+SPOTIFY_PREFERENCE="{ Either 'album' or 'playlist' }"
 ```
 
-- Spotify Preference will alter what is displayed in the cursor section. Your saved albums or your saved playlists.
+- Spotify ID and Cecret are for Spotify API auth
+- Spotify Preference will alter what is displayed in the library. Your saved albums or your saved playlists.
 
 ## Use
 
@@ -66,3 +67,9 @@ Jukebox
 
 - Get reccomendation: r
 - Add reccomendation to queue: c
+
+#### Custom Keybinds
+
+Cutstom keybinds for most major fucntionality is available through changes in your environment file.
+
+For available keybinds, see `.env.example`

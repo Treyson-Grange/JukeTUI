@@ -273,20 +273,3 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 }
-
-func setKeybinds() {
-	keybinds = map[string]string{
-		"Quit":           queryEnv("QUIT", "q"),
-		"Play/Pause":     queryEnv("PLAYPAUSE", "p"),
-		"Skip":           queryEnv("SKIP", "n"),
-		"Shuffle":        queryEnv("SHUFFLE", "s"),
-		"Recommendation": queryEnv("RECOMMENDATION", "r"),
-		"Add to Queue":   queryEnv("ADDTOQUEUE", "c"),
-		"Favorites":      queryEnv("FAVORITES", "f"),
-		"Cursor Up":      "up",
-		"Cursor Down":    "down",
-		"Next Page":      "right",
-		"Previous Page":  "left",
-		"Select":         "enter",
-	}
-}
