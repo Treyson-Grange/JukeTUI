@@ -2,6 +2,8 @@
 
 JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and receive music recommendations through an intuitive jukebox system.
 
+![JukeTUI App Preview](/screenshots/app-preview.png)
+
 ### Features:
 
 - Jukebox: Get tailored song recommendations based on your currently playing track and easily queue songs for seamless listening.
@@ -65,11 +67,11 @@ Playback
 
 Jukebox
 
-- Get reccomendation: r
-- Add reccomendation to queue: c
+- Get recommendation: r
+- Add recommendation to queue: c
 
 #### Custom Keybinds
 
-Cutstom keybinds for most major fucntionality is available through changes in your environment file.
+Custom keybinds for most major functionality is available through changes in your environment file.
 
 For available keybinds, see `.env.example`
