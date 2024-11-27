@@ -1,3 +1,9 @@
+# IMPORTANT
+
+This is legacy code before Spotify decided to deprecate the recommendation system. This branch is more out of hope than anything that Spotify brings the endpoint back.
+
+See [Issue 16](https://github.com/Treyson-Grange/JukeTUI/issues/16) for more information
+
 # JukeTUI
 
 JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and receive music recommendations through an intuitive jukebox system.
