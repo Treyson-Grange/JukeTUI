@@ -115,8 +115,8 @@ func makeNewImage(url string) string {
 // UI Elements
 
 // Get the UI elements for display
-func getUiElements(m Model, boxWidth int) (string, string, string) {
-	return getLibText(m, boxWidth), getPlayBack(m), getReccDetails(m)
+func getUiElements(m Model, boxWidth int) (string, string, string, string) {
+	return getLibText(m, boxWidth), getPlayBack(m), getReccDetails(m), getVisualQueue(m, boxWidth)
 }
 
 // Get the library text for display
@@ -182,4 +182,18 @@ func getReccDetails(m Model) string {
 		)
 	}
 	return recommendationDetails
+}
+
+func getVisualQueue(m Model, boxWidth int) string {
+	queue := "Queue:\n"// Queue is now a list of queueitems
+	for _, item := range m.queue.Queue {
+		nameLen := len(item.Name)
+		artistLen := len(item.Artists[0].Name)
+
+		if 3 + nameLen + artistLen > boxWidth {
+			item.Name = truncate(item.Name, boxWidth - 3 - artistLen)
+		}
+		queue += fmt.Sprintf("%s - %s\n", item.Name, item.Artists[0].Name)
+	}
+	return queue
 }

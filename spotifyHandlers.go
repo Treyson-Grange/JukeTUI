@@ -163,3 +163,11 @@ func handleGetLibraryTotal(token string, listDetail string) tea.Cmd {
 		}
 	}
 }
+
+
+func handleGetQueue(token string) tea.Cmd {
+	return func() tea.Msg {
+		queue := handleGenericFetch[Queue]("/me/player/queue", token, nil, nil)
+		return queue
+	}
+}

@@ -40,6 +40,7 @@ func (m Model) Init() tea.Cmd {
 		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
 		handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), 0),
+		handleGetQueue(m.token),
 	)
 }
 
@@ -70,7 +71,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.Item.ID != "" {
 				data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
 				m.reccomendation = data
-				m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
+				if len(m.reccomendation.Tracks) > 0 {
+					m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
+				}
 			}
 			return m, nil
 
@@ -190,6 +193,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.loading = false
 		}
 
+	case Queue:
+		const QUEUE_LENGTH = 5
+		if len(msg.Queue) > QUEUE_LENGTH {
+			msg.Queue = msg.Queue[:QUEUE_LENGTH]
+		}
+		m.queue = msg
+		return m, nil
+
 	case error:
 		m.errMsg = msg.Error()
 		m.loading = false
@@ -209,11 +220,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, scheduleProgressInc(1 * time.Second)
 	}
 
+
+
 	return m, nil
 }
 
 func (m Model) View() string {
-	//TODO: this is calling GetSize every view. Store it in our model.
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		log.Fatalf("Failed to get terminal size: %v", err)
@@ -222,15 +234,19 @@ func (m Model) View() string {
 	boxHeight := height - UI_LIBRARY_SPACE
 	playBackWidth := width - 2
 
-	libText, playback, reccDetails := getUiElements(m, boxWidth)
+	libText, playback, reccDetails, visQueue := getUiElements(m, boxWidth)
+
+	visQueueHeight := 8
+	jukeboxHeight := boxHeight - visQueueHeight - 3 // 3 is for the border
 
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
-	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(reccDetails)
+	jukebox := boxStyle.Width(boxWidth).Height(jukeboxHeight).Render(reccDetails)
 	playbackBar := boxStyle.Width(playBackWidth).Height(1).Render(playback)
+	visualQueue := boxStyle.Width(boxWidth).Height(visQueueHeight).Render(visQueue)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		lipgloss.JoinHorizontal(lipgloss.Top, library, jukebox),
+		lipgloss.JoinHorizontal(lipgloss.Top, library, lipgloss.JoinVertical(lipgloss.Left, jukebox, visualQueue)),
 		playbackBar,
 	)
 }
