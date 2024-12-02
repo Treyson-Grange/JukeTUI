@@ -32,7 +32,7 @@ func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 var keybinds = map[string]string{}
 
 // spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
-const FETCH_TIMER = 1
+const FETCH_TIMER = 2
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
@@ -141,6 +141,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Name != msg.Item.Name {
 				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
+				m.state = msg
 				return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m), handleGetQueue(m.token))
 			}
 		}

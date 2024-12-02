@@ -119,7 +119,7 @@ func getUiElements(m Model, boxWidth int) (string, string, string, string) {
 	return getLibText(m, boxWidth), getPlayBack(m), m.image, getVisualQueue(m, boxWidth)
 }
 
-// Get the library text for display
+// Generate the library text for display
 func getLibText(m Model, boxWidth int) string {
 	libText := ""
 	if m.libraryList == nil {
@@ -155,7 +155,7 @@ func getLibText(m Model, boxWidth int) string {
 	return libText
 }
 
-// Get the playback text for display
+// Generate the playback text for display
 func getPlayBack(m Model) string {
 	status := "▶ "
 	if m.state.IsPlaying {
@@ -172,6 +172,8 @@ func getPlayBack(m Model) string {
 		return "No Playback Data. Please start a playback session on your device"
 	}
 }
+
+// Generate the visual queue for display
 func getVisualQueue(m Model, boxWidth int) string {
 	queue := "Queue:\n"
 	queueLen := len(m.queue.Queue)
