@@ -107,7 +107,7 @@ func makeNewImage(url string) string {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	const targetWidth, targetHeight = 15, 15
+	const targetWidth, targetHeight = 20, 20
 
 	return printImage(resizeImage(img, targetWidth, targetHeight))
 }
@@ -172,17 +172,20 @@ func getPlayBack(m Model) string {
 		return "No Playback Data. Please start a playback session on your device"
 	}
 }
-
 func getVisualQueue(m Model, boxWidth int) string {
-	queue := "Queue:\n"// Queue is now a list of queueitems
-	for _, item := range m.queue.Queue {
+	queue := "Queue:\n"
+	queueLen := len(m.queue.Queue)
+	SEP := " - "
+	for i, item := range m.queue.Queue {
 		nameLen := len(item.Name)
 		artistLen := len(item.Artists[0].Name)
-
-		if 3 + nameLen + artistLen > boxWidth {
-			item.Name = truncate(item.Name, boxWidth - 3 - artistLen)
+		if len(SEP)+nameLen+artistLen > boxWidth {
+			item.Name = truncate(item.Name, boxWidth-3-artistLen)
 		}
-		queue += fmt.Sprintf("%s - %s\n", item.Name, item.Artists[0].Name)
+		queue += fmt.Sprintf("%s - %s", item.Name, item.Artists[0].Name)
+		if i < queueLen-1 {
+			queue += "\n"
+		}
 	}
 	return queue
 }

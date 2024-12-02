@@ -99,7 +99,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keybinds["Next Page"]:
 			m.loading = true
 			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
-				if m.offset == 0 { // IDK why this is necessary, but its the only way i got it working.
+				if m.offset == 0 {
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites))
 				} else {
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
@@ -141,6 +141,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Name != msg.Item.Name {
 				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
+				return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m), handleGetQueue(m.token))
 			}
 		}
 		m.state = msg
@@ -202,9 +203,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, scheduleProgressInc(1 * time.Second)
 	}
-
-
-
 	return m, nil
 }
 
@@ -220,7 +218,7 @@ func (m Model) View() string {
 	libText, playback, image, visQueue := getUiElements(m, boxWidth)
 
 	visQueueHeight := 8
-	jukeboxHeight := boxHeight - visQueueHeight - 3 // 3 is for the border
+	jukeboxHeight := boxHeight - visQueueHeight - 2
 
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
 	jukebox := boxStyle.Width(boxWidth).Height(jukeboxHeight).Render(image)
