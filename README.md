@@ -1,14 +1,14 @@
 # JukeTUI
 
-JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and receive music recommendations through an intuitive jukebox system.
+JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and view pixelated versions of their album covers through an intuitive jukebox system.
 
 ![JukeTUI App Preview](/screenshots/app-preview.png)
 
 ### Features:
 
-- Jukebox: Get tailored song recommendations based on your currently playing track and easily queue songs for seamless listening.
 - Library: Browse your Spotify music library, including albums and playlists, and play your favorite tracks directly from the app.
 - Playback Bar: Effortlessly manage your music with controls to play, pause, skip tracks, and view what’s currently playing.
+- Pixelated album covers: Your favorite album covers are displayed while music is playing, adding a retro touch to your listening experience.
 
 ## Setup
 
@@ -40,7 +40,7 @@ SPOTIFY_SECRET="{ From the developer dashboard }"
 SPOTIFY_PREFERENCE="{ Either 'album' or 'playlist' }"
 ```
 
-- Spotify ID and Cecret are for Spotify API auth
+- Spotify ID and Secret are for Spotify API auth
 - Spotify Preference will alter what is displayed in the library. Your saved albums or your saved playlists.
 
 ## Use
@@ -64,11 +64,6 @@ Playback
 - Play/Pause: p
 - Skip: n
 - Toggle shuffle: s
-
-Jukebox
-
-- Get recommendation: r
-- Add recommendation to queue: c
 
 #### Custom Keybinds
 

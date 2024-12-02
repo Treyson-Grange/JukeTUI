@@ -29,9 +29,6 @@ type Model struct {
 	//Whether or not we're currently fetching access token initially
 	loading bool
 
-	//Current recommendation, if any.
-	reccomendation SpotifyRecommendations
-
 	//List detail, either "album" or "playlist".
 	listDetail string
 
@@ -58,6 +55,9 @@ type Model struct {
 
 	// Favorites list
 	favorites []LibraryFavorite
+
+	// Queue list
+	queue Queue//This isnt what itll be
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -85,22 +85,6 @@ type SpotifyTokenResponse struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token,omitempty"`
-}
-
-// SpotifyRecommendations struct for parsing the recommendations response.
-type SpotifyRecommendations struct {
-	Tracks []struct {
-		Name    string `json:"name"`
-		Artists []struct {
-			Name string `json:"name"`
-		} `json:"artists"`
-		URI   string `json:"uri"`
-		Album struct {
-			Image []struct {
-				URL string `json:"url"`
-			} `json:"images"`
-		} `json:"album"`
-	} `json:"tracks"`
 }
 
 // PlaybackState struct for parsing the playback state response.
@@ -194,4 +178,21 @@ type LibraryFavorite struct {
 	Title  string `json:"title"`
 	Author string `json:"author"`
 	URI    string `json:"URI"`
+}
+
+
+type Queue struct {
+	Queue []QueueItem `json:"queue"`
+}
+
+type QueueItem struct {
+	Href       string `json:"href"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	URI        string `json:"uri"`
+	IsLocal    bool   `json:"is_local"`
+	Artists	[]struct {
+		Name string `json:"name"`
+	} `json:"artists"`
 }

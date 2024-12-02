@@ -148,7 +148,7 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 //
 // Parameters:
 // - token: Spotify access token.
-// - playlistID: The ID of the playlist to fetch.
+// - listDetail: The type of playlist to fetch (album or playlist).
 //
 // Returns:
 // - The fetched playlist.
@@ -161,5 +161,18 @@ func handleGetLibraryTotal(token string, listDetail string) tea.Cmd {
 			playlist := handleGenericFetch[SpotifyPlaylist]("/me/playlists", token, map[string]string{"limit": "1"}, nil)
 			return playlist.Total
 		}
+	}
+}
+
+
+// handleFetchPlaylist fetches a playlist from the Spotify API.
+//
+// Parameters:
+// - token: Spotify access token.
+
+func handleGetQueue(token string) tea.Cmd {
+	return func() tea.Msg {
+		queue := handleGenericFetch[Queue]("/me/player/queue", token, nil, nil)
+		return queue
 	}
 }

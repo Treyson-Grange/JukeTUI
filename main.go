@@ -32,7 +32,7 @@ func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 var keybinds = map[string]string{}
 
 // spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
-const FETCH_TIMER = 1
+const FETCH_TIMER = 2
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
@@ -40,6 +40,7 @@ func (m Model) Init() tea.Cmd {
 		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
 		handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), 0),
+		handleGetQueue(m.token),
 	)
 }
 
@@ -64,21 +65,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Shuffle"]:
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
-			return m, nil
-
-		case keybinds["Recommendation"]:
-			if m.state.Item.ID != "" {
-				data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
-				m.reccomendation = data
-				m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
-			}
-			return m, nil
-
-		case keybinds["Add to Queue"]:
-			if len(m.reccomendation.Tracks) > 0 {
-				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
-			}
-			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
 			return m, nil
 
 		case keybinds["Favorites"]:
@@ -113,7 +99,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case keybinds["Next Page"]:
 			m.loading = true
 			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
-				if m.offset == 0 { // IDK why this is necessary, but its the only way i got it working.
+				if m.offset == 0 {
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites))
 				} else {
 					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
@@ -155,6 +141,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Name != msg.Item.Name {
 				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
+				m.state = msg
+				return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m), handleGetQueue(m.token))
 			}
 		}
 		m.state = msg
@@ -190,6 +178,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.loading = false
 		}
 
+	case Queue:
+		const QUEUE_LENGTH = 5
+		if len(msg.Queue) > QUEUE_LENGTH {
+			msg.Queue = msg.Queue[:QUEUE_LENGTH]
+		}
+		m.queue = msg
+		return m, nil
+
 	case error:
 		m.errMsg = msg.Error()
 		m.loading = false
@@ -208,12 +204,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, scheduleProgressInc(1 * time.Second)
 	}
-
 	return m, nil
 }
 
 func (m Model) View() string {
-	//TODO: this is calling GetSize every view. Store it in our model.
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		log.Fatalf("Failed to get terminal size: %v", err)
@@ -222,15 +216,19 @@ func (m Model) View() string {
 	boxHeight := height - UI_LIBRARY_SPACE
 	playBackWidth := width - 2
 
-	libText, playback, reccDetails := getUiElements(m, boxWidth)
+	libText, playback, image, visQueue := getUiElements(m, boxWidth)
+
+	visQueueHeight := 8
+	jukeboxHeight := boxHeight - visQueueHeight - 2
 
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
-	jukebox := boxStyle.Width(boxWidth).Height(boxHeight).Render(reccDetails)
+	jukebox := boxStyle.Width(boxWidth).Height(jukeboxHeight).Render(image)
 	playbackBar := boxStyle.Width(playBackWidth).Height(1).Render(playback)
+	visualQueue := boxStyle.Width(boxWidth).Height(visQueueHeight).Render(visQueue)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		lipgloss.JoinHorizontal(lipgloss.Top, library, jukebox),
+		lipgloss.JoinHorizontal(lipgloss.Top, library, lipgloss.JoinVertical(lipgloss.Left, jukebox, visualQueue)),
 		playbackBar,
 	)
 }

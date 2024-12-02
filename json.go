@@ -12,6 +12,7 @@ import (
 // Specifically, it contains the functionality for reading and writing our favorite library items to a JSON file.
 // There will be 2 files. One for albums, one for playlists.
 
+// Read the JSON file and return a slice of LibraryFavorite structs.
 func readJSON(filePath string) ([]LibraryFavorite, bool) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -29,6 +30,7 @@ func readJSON(filePath string) ([]LibraryFavorite, bool) {
 	return favorites, true
 }
 
+// Use os.WriteFile to write a new favorite to the JSON file.
 func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -64,6 +66,7 @@ func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
 	return true
 }
 
+// Use os.WriteFile to remove a favorite from the JSON file.
 func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
@@ -95,6 +98,7 @@ func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
 	return true
 }
 
+// Use os.WriteFile to create an empty JSON file.
 func createEmptyJSONFile(filePath string) bool {
 	emptyData := []byte("[]")
 	if err := os.WriteFile(filePath, emptyData, 0644); err != nil {

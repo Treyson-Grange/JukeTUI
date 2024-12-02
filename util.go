@@ -63,8 +63,6 @@ func setKeybinds() {
 		"Play/Pause":     queryEnv("PLAYPAUSE", "p"),
 		"Skip":           queryEnv("SKIP", "n"),
 		"Shuffle":        queryEnv("SHUFFLE", "s"),
-		"Recommendation": queryEnv("RECOMMENDATION", "r"),
-		"Add to Queue":   queryEnv("ADDTOQUEUE", "c"),
 		"Favorites":      queryEnv("FAVORITES", "f"),
 		"Cursor Up":      "up",
 		"Cursor Down":    "down",

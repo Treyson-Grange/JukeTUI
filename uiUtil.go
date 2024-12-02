@@ -107,7 +107,7 @@ func makeNewImage(url string) string {
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	const targetWidth, targetHeight = 15, 15
+	const targetWidth, targetHeight = 20, 20
 
 	return printImage(resizeImage(img, targetWidth, targetHeight))
 }
@@ -115,11 +115,11 @@ func makeNewImage(url string) string {
 // UI Elements
 
 // Get the UI elements for display
-func getUiElements(m Model, boxWidth int) (string, string, string) {
-	return getLibText(m, boxWidth), getPlayBack(m), getReccDetails(m)
+func getUiElements(m Model, boxWidth int) (string, string, string, string) {
+	return getLibText(m, boxWidth), getPlayBack(m), m.image, getVisualQueue(m, boxWidth)
 }
 
-// Get the library text for display
+// Generate the library text for display
 func getLibText(m Model, boxWidth int) string {
 	libText := ""
 	if m.libraryList == nil {
@@ -155,7 +155,7 @@ func getLibText(m Model, boxWidth int) string {
 	return libText
 }
 
-// Get the playback text for display
+// Generate the playback text for display
 func getPlayBack(m Model) string {
 	status := "▶ "
 	if m.state.IsPlaying {
@@ -173,13 +173,21 @@ func getPlayBack(m Model) string {
 	}
 }
 
-// Get the reccomendation details for display
-func getReccDetails(m Model) string {
-	recommendationDetails := "Press '" + keybinds["Recommendation"] + "' for a recommendation!\n\n" + m.image + "\n"
-	if len(m.reccomendation.Tracks) > 0 {
-		recommendationDetails += fmt.Sprintf(
-			"%s - %s\n '%s' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, keybinds["Add to Queue"],
-		)
+// Generate the visual queue for display
+func getVisualQueue(m Model, boxWidth int) string {
+	queue := "Queue:\n"
+	queueLen := len(m.queue.Queue)
+	SEP := " - "
+	for i, item := range m.queue.Queue {
+		nameLen := len(item.Name)
+		artistLen := len(item.Artists[0].Name)
+		if len(SEP)+nameLen+artistLen > boxWidth {
+			item.Name = truncate(item.Name, boxWidth-3-artistLen)
+		}
+		queue += fmt.Sprintf("%s - %s", item.Name, item.Artists[0].Name)
+		if i < queueLen-1 {
+			queue += "\n"
+		}
 	}
-	return recommendationDetails
+	return queue
 }
