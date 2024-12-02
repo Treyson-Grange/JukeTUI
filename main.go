@@ -67,23 +67,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			handleGenericPut("/me/player/shuffle", m.token, map[string]string{"state": fmt.Sprintf("%t", !m.state.ShuffleState)}, nil)
 			return m, nil
 
-		case keybinds["Recommendation"]:
-			if m.state.Item.ID != "" {
-				data := handleGenericFetch[SpotifyRecommendations]("/recommendations", m.token, map[string]string{"seed_tracks": m.state.Item.ID, "limit": "1"}, nil)
-				m.reccomendation = data
-				if len(m.reccomendation.Tracks) > 0 {
-					m.image = makeNewImage(m.reccomendation.Tracks[0].Album.Image[0].URL)
-				}
-			}
-			return m, nil
-
-		case keybinds["Add to Queue"]:
-			if len(m.reccomendation.Tracks) > 0 {
-				handleGenericPost("/me/player/queue", m.token, map[string]string{"uri": m.reccomendation.Tracks[0].URI}, nil)
-			}
-			m.image = makeNewImage(m.state.Item.Album.Images[0].URL) // Reset image to current song.
-			return m, nil
-
 		case keybinds["Favorites"]:
 			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
 			if m.favorites != nil {
@@ -234,13 +217,13 @@ func (m Model) View() string {
 	boxHeight := height - UI_LIBRARY_SPACE
 	playBackWidth := width - 2
 
-	libText, playback, reccDetails, visQueue := getUiElements(m, boxWidth)
+	libText, playback, image, visQueue := getUiElements(m, boxWidth)
 
 	visQueueHeight := 8
 	jukeboxHeight := boxHeight - visQueueHeight - 3 // 3 is for the border
 
 	library := libraryStyle.Width(boxWidth).Height(boxHeight).Render(libText)
-	jukebox := boxStyle.Width(boxWidth).Height(jukeboxHeight).Render(reccDetails)
+	jukebox := boxStyle.Width(boxWidth).Height(jukeboxHeight).Render(image)
 	playbackBar := boxStyle.Width(playBackWidth).Height(1).Render(playback)
 	visualQueue := boxStyle.Width(boxWidth).Height(visQueueHeight).Render(visQueue)
 

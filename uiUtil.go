@@ -116,7 +116,7 @@ func makeNewImage(url string) string {
 
 // Get the UI elements for display
 func getUiElements(m Model, boxWidth int) (string, string, string, string) {
-	return getLibText(m, boxWidth), getPlayBack(m), getReccDetails(m), getVisualQueue(m, boxWidth)
+	return getLibText(m, boxWidth), getPlayBack(m), m.image, getVisualQueue(m, boxWidth)
 }
 
 // Get the library text for display
@@ -171,17 +171,6 @@ func getPlayBack(m Model) string {
 	} else {
 		return "No Playback Data. Please start a playback session on your device"
 	}
-}
-
-// Get the reccomendation details for display
-func getReccDetails(m Model) string {
-	recommendationDetails := "Press '" + keybinds["Recommendation"] + "' for a recommendation!\n\n" + m.image + "\n"
-	if len(m.reccomendation.Tracks) > 0 {
-		recommendationDetails += fmt.Sprintf(
-			"%s - %s\n '%s' to add to your queue!", m.reccomendation.Tracks[0].Name, m.reccomendation.Tracks[0].Artists[0].Name, keybinds["Add to Queue"],
-		)
-	}
-	return recommendationDetails
 }
 
 func getVisualQueue(m Model, boxWidth int) string {

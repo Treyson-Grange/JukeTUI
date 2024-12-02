@@ -29,9 +29,6 @@ type Model struct {
 	//Whether or not we're currently fetching access token initially
 	loading bool
 
-	//Current recommendation, if any.
-	reccomendation SpotifyRecommendations
-
 	//List detail, either "album" or "playlist".
 	listDetail string
 
@@ -88,22 +85,6 @@ type SpotifyTokenResponse struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token,omitempty"`
-}
-
-// SpotifyRecommendations struct for parsing the recommendations response.
-type SpotifyRecommendations struct {
-	Tracks []struct {
-		Name    string `json:"name"`
-		Artists []struct {
-			Name string `json:"name"`
-		} `json:"artists"`
-		URI   string `json:"uri"`
-		Album struct {
-			Image []struct {
-				URL string `json:"url"`
-			} `json:"images"`
-		} `json:"album"`
-	} `json:"tracks"`
 }
 
 // PlaybackState struct for parsing the playback state response.
