@@ -57,7 +57,7 @@ type Model struct {
 	favorites []LibraryFavorite
 
 	// Queue list
-	queue Queue//This isnt what itll be
+	queue Queue //This isnt what itll be
 }
 
 // playbackMsg tells the update to fetch playback state.
@@ -180,19 +180,18 @@ type LibraryFavorite struct {
 	URI    string `json:"URI"`
 }
 
-
 type Queue struct {
 	Queue []QueueItem `json:"queue"`
 }
 
 type QueueItem struct {
-	Href       string `json:"href"`
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Type       string `json:"type"`
-	URI        string `json:"uri"`
-	IsLocal    bool   `json:"is_local"`
-	Artists	[]struct {
+	Href    string `json:"href"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	URI     string `json:"uri"`
+	IsLocal bool   `json:"is_local"`
+	Artists []struct {
 		Name string `json:"name"`
 	} `json:"artists"`
 }

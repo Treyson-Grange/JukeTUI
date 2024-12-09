@@ -12,6 +12,8 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/image/draw"
+
+	moji "github.com/Treyson-Grange/go-moji-ui"
 )
 
 const SPOTIFY_GREEN = "#1DB954"
@@ -149,7 +151,7 @@ func getLibText(m Model, boxWidth int) string {
 			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
 			favorite := map[bool]string{true: "♥ ", false: "  "}[item.favorite]
-			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, item.name, item.artist, play)
+			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, moji.RemoveEmoji(item.name), item.artist, play)
 		}
 	}
 	return libText

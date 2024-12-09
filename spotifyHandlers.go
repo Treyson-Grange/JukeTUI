@@ -164,7 +164,6 @@ func handleGetLibraryTotal(token string, listDetail string) tea.Cmd {
 	}
 }
 
-
 // handleFetchPlaylist fetches a playlist from the Spotify API.
 //
 // Parameters:

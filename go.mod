@@ -3,6 +3,7 @@ module github.com/treyson-grange/JukeTUI
 go 1.23.2
 
 require (
+	github.com/Treyson-Grange/go-moji-ui v1.0.0
 	github.com/charmbracelet/bubbletea v1.1.1
 	github.com/charmbracelet/lipgloss v0.13.1
 	github.com/joho/godotenv v1.5.1

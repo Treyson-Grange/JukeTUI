@@ -1,3 +1,5 @@
+github.com/Treyson-Grange/go-moji-ui v1.0.0 h1:7MGeje3XXGYWwtqVlb1++bJ94ycoQq912c7325r6wIQ=
+github.com/Treyson-Grange/go-moji-ui v1.0.0/go.mod h1:UrL8Tg3L/AP0WyagQyT9I8IfHl4/4Ow5xZ2ORW6cuGs=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/charmbracelet/bubbletea v1.1.1 h1:KJ2/DnmpfqFtDNVTvYZ6zpPFL9iRCRr0qqKOCvppbPY=
