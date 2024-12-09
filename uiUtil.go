@@ -151,7 +151,7 @@ func getLibText(m Model, boxWidth int) string {
 			}
 			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
 			favorite := map[bool]string{true: "♥ ", false: "  "}[item.favorite]
-			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, moji.RemoveEmoji(item.name), item.artist, play)
+			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, moji.FilterEmojisBySize(item.name, 2), item.artist, play)
 		}
 	}
 	return libText
