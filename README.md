@@ -1,6 +1,6 @@
 # JukeTUI
 
-JukeTUI is a command-line interface (TUI) application that allows users to control Spotify, manage playback, and view pixelated versions of their album covers through an intuitive jukebox system.
+JukeTUI is a tangible user interface (TUI) that allows users to control Spotify, manage playback, monitor the queue, and view pixelated versions of their album covers through an intuitive jukebox system.
 
 ![JukeTUI App Preview](/screenshots/app-preview.png)
 
@@ -8,6 +8,7 @@ JukeTUI is a command-line interface (TUI) application that allows users to contr
 
 - Library: Browse your Spotify music library, including albums and playlists, and play your favorite tracks directly from the app.
 - Playback Bar: Effortlessly manage your music with controls to play, pause, skip tracks, and view what’s currently playing.
+- Visual Queue: Displays the next 5 tracks in your queue, so you always know what’s coming up.
 - Pixelated album covers: Your favorite album covers are displayed while music is playing, adding a retro touch to your listening experience.
 
 ## Setup

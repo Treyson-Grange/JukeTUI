@@ -16,7 +16,7 @@ import (
 func readJSON(filePath string) ([]LibraryFavorite, bool) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		errorLogger.Println("Failed to opsen albums.json: ", err)
+		errorLogger.Println("Failed to open albums.json: ", err)
 		return nil, false
 	}
 	defer file.Close()
