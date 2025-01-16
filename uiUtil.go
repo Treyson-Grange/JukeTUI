@@ -18,7 +18,7 @@ import (
 
 const SPOTIFY_GREEN = "#1DB954"
 const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
-const CHARACTERS = 7       // Characters we have to account for when truncating
+const CHARACTERS = 8       // Characters we have to account for when truncating
 const LIBRARY_SPACING = 10
 
 var (
@@ -108,6 +108,7 @@ func makeNewImage(url string) string {
 	img, err := fetchImage(url)
 	if err != nil {
 		fmt.Println("Error:", err)
+		return "Error fetching image"
 	}
 	const targetWidth, targetHeight = 20, 20
 

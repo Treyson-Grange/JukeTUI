@@ -3,3 +3,4 @@ JukeTUI
 *.log
 
 favorites/*.json
+.vscode
