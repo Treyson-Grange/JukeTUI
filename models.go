@@ -4,14 +4,12 @@ import (
 	"time"
 )
 
-// Models.go
-// This supplies all models that JukeTUI will use in operation, specifically
-// on get requests. These will allow us to parse our json correctly, and
-// access our data quicker.
+// =====================================
+// ===== models.go | Data models =======
+// =====================================
 
 type Model struct {
 	//Playback state, including track info, playback status, etc.
-	//For specifics, see PlaybackState struct in models.go
 	state PlaybackState
 
 	//Spotify web API access token. Lasts for 1 hour.
@@ -65,19 +63,6 @@ type playbackMsg struct{}
 
 // progressMsg tells the update to update the progress of the current track.
 type progressMsg struct{}
-
-// SpotifyUser struct for parsing the user's Spotify profile.
-// Currently, unused.
-type SpotifyUser struct {
-	DisplayName  string `json:"display_name"`
-	ExternalURLs struct {
-		Spotify string `json:"spotify"`
-	} `json:"external_urls"`
-	Followers struct {
-		Total int `json:"total"`
-	} `json:"followers"`
-	ID string `json:"id"`
-}
 
 // SpotifyTokenResponse struct for parsing the access token response.
 type SpotifyTokenResponse struct {
@@ -142,6 +127,7 @@ type SpotifyAlbum struct {
 	Total int `json:"total"`
 }
 
+// SpotifyAlbumItem struct for parsing the album item response.
 type SpotifyAlbumItem struct {
 	Album struct {
 		Name    string `json:"name"`
@@ -174,16 +160,19 @@ type LibraryItem struct {
 	favorite bool
 }
 
+// LibraryFavorite struct for storing favorite album/playlist information.
 type LibraryFavorite struct {
 	Title  string `json:"title"`
 	Author string `json:"author"`
 	URI    string `json:"URI"`
 }
 
+// Queue struct for storing the queue of songs.
 type Queue struct {
 	Queue []QueueItem `json:"queue"`
 }
 
+// QueueItem struct for storing the queue item information.
 type QueueItem struct {
 	Href    string `json:"href"`
 	ID      string `json:"id"`

@@ -7,10 +7,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// SpotifyHandlers.go
-// This file contains the error handling functions for Spotify API requests.
+// ================================================================
+// ===== spotifyHandlers.go | Various requests to Spotify API =====
+// ================================================================
 
-// handleGenericFetch makes a generic fetch request to the Spotify API.
+// handleGenericFetch handles and error checks a generic fetch
 //
 // Parameters:
 // - endpoint: The endpoint to fetch data from.
@@ -33,7 +34,7 @@ func handleGenericFetch[T any](endpoint, accessToken string, queryParams, bodyAr
 	return data
 }
 
-// handleGenericPut
+// handleGenericPut handles and error checks a generic PUT request.
 //
 // Parameters:
 // - endpoint: The endpoint to send data to
@@ -53,7 +54,7 @@ func handleGenericPut(endpoint, accessToken string, queryParams, bodyArgs map[st
 	return statusCode, nil
 }
 
-// handleGenericPost makes a generic POST request to the Spotify API.
+// handleGenericPost handles and error checks a generic POST request.
 //
 // Parameters:
 // - endpoint: The endpoint to post data to.
@@ -73,7 +74,7 @@ func handleGenericPost(endpoint, accessToken string, queryParams, bodyArgs map[s
 	return statusCode, nil
 }
 
-// handleFetchPlayback fetches the playback state from the Spotify API.
+// handleFetchPlayback handles fetching and error checking of the playback state.
 //
 // Parameters:
 // - token: Spotify access token.
@@ -121,7 +122,7 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 					}
 				}
 				if !isFavorite {
-					filteredItems = append(filteredItems, item) // Keep item
+					filteredItems = append(filteredItems, item)
 				}
 			}
 			albums.Items = filteredItems
@@ -135,7 +136,7 @@ func handleFetchLibrary(favorites []LibraryFavorite, token string, listDetail st
 			}
 			for _, item := range playlist.Items {
 				if _, found := favoriteURIs[item.URI]; !found {
-					filteredItems = append(filteredItems, item) // Keep item if not a favorite
+					filteredItems = append(filteredItems, item)
 				}
 			}
 			playlist.Items = filteredItems

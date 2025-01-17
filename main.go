@@ -15,6 +15,10 @@ import (
 	"golang.org/x/term"
 )
 
+// ==========================================
+// ===== main.go | Entry point and loop =====
+// ==========================================
+
 func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
@@ -31,7 +35,6 @@ func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 
 var keybinds = map[string]string{}
 
-// spotify api is 180 per minute, counts over a 30 second rolling window. 1 fetch per second will be safe
 const FETCH_TIMER = 2
 
 func (m Model) Init() tea.Cmd {
@@ -234,7 +237,7 @@ func (m Model) View() string {
 }
 
 func main() {
-	checkArguments()
+	
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -246,6 +249,8 @@ func main() {
 	listDetail := os.Getenv("SPOTIFY_PREFERENCE")
 
 	setKeybinds()
+
+	checkArguments()
 
 	fmt.Println("Opening login page...")
 	OpenLoginPage(clientID)

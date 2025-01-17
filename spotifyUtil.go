@@ -9,9 +9,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// SpotifyUtil.go
-// This file holds any utils that interact with the inner workings of
-// our spotify system.
+// ===============================================================
+// ===== spotifyUtil.go | Utilities to deal with Spotify API =====
+// ===============================================================
 
 const SPOTIFY_API = "https://api.spotify.com/v1"
 
@@ -25,8 +25,7 @@ const SPOTIFY_API = "https://api.spotify.com/v1"
 // - string: the full endpoint URL, with query parameters if any.
 func createEndpoint(endpoint string, queryParams map[string]string) string { // TODO: Test this lol.
 	endpoint = fmt.Sprintf("%s%s", SPOTIFY_API, endpoint)
-
-	if len(queryParams) == 0 { // Empty map is not nil
+	if len(queryParams) == 0 {
 		return endpoint
 	}
 

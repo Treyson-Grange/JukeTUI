@@ -15,11 +15,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// SpotifyAuth.go
-// This file contains the functions for authenticating with Spotify.
-// The functions in this file are used to open the Spotify login page in the
-// user's default browser, get the authorization code from the callback URL,
-// and exchange the authorization code for an access token.
+// ================================================================
+// ===== spotifyAuth.go | Login and authenticate with Spotify =====
+// ================================================================
 
 const (
 	SPOTIFY_AUTH_URL  = "https://accounts.spotify.com/authorize"
@@ -61,7 +59,6 @@ func GetCodeFromCallback() string {
 	var code string
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		code = r.URL.Query().Get("code")
-		// JavaScript to close the window
 		htmlResponse := `
             <html>
                 <body>

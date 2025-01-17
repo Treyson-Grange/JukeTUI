@@ -8,8 +8,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// log.go
-// This file contains all logging functionality. Primarily for development purposes.
+// ============================================
+// ===== log.go | Logging for development =====
+// ============================================
 
 // errorLogger logs errors to the error.log file.
 // It is used to log errors that occur during the execution of the program.

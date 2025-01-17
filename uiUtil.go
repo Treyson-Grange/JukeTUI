@@ -32,7 +32,9 @@ var (
 			Padding(0).Align(lipgloss.Left)
 )
 
-// Text formatting functions
+// =======================
+// === Text Formatting ===
+// =======================
 
 // Truncate a string to fit any width
 func truncate(str string, width int) string {
@@ -55,7 +57,9 @@ func msToMinSec(ms int) string {
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
 
-// Album Cover Functionality
+// =====================================
+// ===== Album Cover Functionality =====
+// =====================================
 
 // given a color, return the ANSI color code
 func bgAnsiColor(c color.Color) string {
@@ -79,7 +83,6 @@ func printImage(img image.Image) string {
 	var result strings.Builder
 
 	// For every pixel in the image, get the color and print it
-	// Intensive operation, MAKE this only happen once.
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		var line strings.Builder
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -107,7 +110,6 @@ func fetchImage(url string) (image.Image, error) {
 func makeNewImage(url string) string {
 	img, err := fetchImage(url)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return "Error fetching image"
 	}
 	const targetWidth, targetHeight = 20, 20
@@ -115,7 +117,9 @@ func makeNewImage(url string) string {
 	return printImage(resizeImage(img, targetWidth, targetHeight))
 }
 
-// UI Elements
+// =======================
+// ===== UI Elements =====
+// =======================
 
 // Get the UI elements for display
 func getUiElements(m Model, boxWidth int) (string, string, string, string) {
@@ -160,6 +164,9 @@ func getLibText(m Model, boxWidth int) string {
 
 // Generate the playback text for display
 func getPlayBack(m Model) string {
+	if m.state.Item.Artists == nil {
+		return "No Playback Data. Please start a playback session on your device"
+	}
 	status := "▶ "
 	if m.state.IsPlaying {
 		status = "▮▮"
@@ -169,11 +176,14 @@ func getPlayBack(m Model) string {
 		shuffle = "Shuffle"
 	}
 
-	if m.state.Item.Artists != nil {
-		return bracketWrap(m.state.Item.Name+" | "+m.state.Item.Artists[0].Name) + bracketWrap(lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)) + bracketWrap(msToMinSec(m.progressMs)+" / "+msToMinSec(m.state.Item.DurationMs)) + bracketWrap(shuffle)
-	} else {
-		return "No Playback Data. Please start a playback session on your device"
-	}
+	progress := msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)
+	statusRendered := lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)
+
+	return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) +
+		bracketWrap(statusRendered) +
+		bracketWrap(progress) +
+		bracketWrap(shuffle)
+
 }
 
 // Generate the visual queue for display

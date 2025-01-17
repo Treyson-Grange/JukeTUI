@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
-	"sort"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// Util.go contains utility functions that are used in the main.go file
-// Kinda a catch-all for functions that don't fit anywhere else
+// ===========================================
+// ===== util.go | General Program Utils =====
+// ===========================================
 
 // Schedule the next fetch of the playback state.
 func scheduleNextFetch(d time.Duration) tea.Cmd {
@@ -33,15 +33,26 @@ func checkArguments() {
 	if len(os.Args) > 1 {
 		for _, arg := range os.Args {
 			if arg == "-h" || arg == "--help" {
-				fmt.Println("Keybinds:")
-				keys := make([]string, 0, len(keybinds))
-				for key := range keybinds {
-					keys = append(keys, key)
+				order := []string{
+					"Skip",
+					"Play/Pause",
+					"Select",
+					"Shuffle",
+					"Favorites",
+					"Next Page",
+					"Previous Page",
+					"Cursor Up",
+					"Cursor Down",
+					"Quit",
 				}
-				sort.Strings(keys)
-				for _, key := range keys {
+				fmt.Println("Keybinds:")
+				for _, key := range order {
 					fmt.Printf("\t%s: %s\n", key, keybinds[key])
 				}
+				os.Exit(0)
+			}
+			if arg == "-v" || arg == "--version" {
+				fmt.Println("JukeTUI v1.0.0")
 				os.Exit(0)
 			}
 		}

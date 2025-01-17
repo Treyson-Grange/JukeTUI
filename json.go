@@ -7,18 +7,23 @@ import (
 	"os"
 )
 
-// JSON.go
-// This file contains the functions for reading and writing JSON data.
-// Specifically, it contains the functionality for reading and writing our favorite library items to a JSON file.
-// There will be 2 files. One for albums, one for playlists.
+// =========================================
+// ===== json.go | Read and Write JSON =====
+// =========================================
+
+// Open file and return file
+func openFile(filePath string) (*os.File, bool) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		errorLogger.Println("Failed to open file: ", err)
+		return nil, false
+	}
+	return file, true
+}
 
 // Read the JSON file and return a slice of LibraryFavorite structs.
 func readJSON(filePath string) ([]LibraryFavorite, bool) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		errorLogger.Println("Failed to open albums.json: ", err)
-		return nil, false
-	}
+	file, _ := openFile(filePath)
 	defer file.Close()
 
 	favorites := []LibraryFavorite{}
@@ -32,11 +37,7 @@ func readJSON(filePath string) ([]LibraryFavorite, bool) {
 
 // Use os.WriteFile to write a new favorite to the JSON file.
 func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
-	file, err := os.Open(filePath)
-	if err != nil {
-		errorLogger.Println("Failed to open albums.json: ", err)
-		return false
-	}
+	file, _ := openFile(filePath)
 	defer file.Close()
 
 	data, err := io.ReadAll(file)

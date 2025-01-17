@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-// Spotify.go
-// This file contains the generic functions for fetching data from the Spotify API.
-// These functions are used by the handlers to fetch data from the Spotify API.
+// =====================================
+// ===== spotifyRequests.go | Interact with Spotify API =====
+// =====================================
 
 // genericRequest makes an HTTP request to the Spotify API and returns the response as a struct or a response code.
 //
