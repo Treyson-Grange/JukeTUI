@@ -143,7 +143,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case PlaybackState:
 		if len(msg.Item.Album.Images) > 0 {
 			if m.state.Item.Name != msg.Item.Name {
-				m.image = makeNewImage(msg.Item.Album.Images[0].URL)
+				width, height, err := term.GetSize(int(os.Stdout.Fd()))
+				if err != nil {
+					log.Fatalf("Failed to get terminal size: %v", err)
+				}
+				m.image = makeNewImage(msg.Item.Album.Images[0].URL, width / 2, height / 2)
 				m.state = msg
 				return m, tea.Batch(scheduleNextFetch(FETCH_TIMER*time.Second), CheckTokenExpiryCmd(m), handleGetQueue(m.token))
 			}

@@ -7,6 +7,7 @@ import (
 	_ "image/gif" // These aren't used directly, but are required for image.Decode to work
 	_ "image/jpeg"
 	_ "image/png"
+	"math"
 	"net/http"
 	"strings"
 
@@ -107,14 +108,14 @@ func fetchImage(url string) (image.Image, error) {
 }
 
 // Handler for fetching an image, resizing it, and returning it as a string
-func makeNewImage(url string) string {
+func makeNewImage(url string, width, height int) string {
 	img, err := fetchImage(url)
 	if err != nil {
 		return "Error fetching image"
 	}
-	const targetWidth, targetHeight = 20, 20
 
-	return printImage(resizeImage(img, targetWidth, targetHeight))
+	albumSize := math.Min(float64(width), float64(height))
+	return printImage(resizeImage(img, int(albumSize), int(albumSize)))
 }
 
 // =======================
@@ -123,7 +124,7 @@ func makeNewImage(url string) string {
 
 // Get the UI elements for display
 func getUiElements(m Model, boxWidth int) (string, string, string, string) {
-	return getLibText(m, boxWidth), getPlayBack(m), m.image, getVisualQueue(m, boxWidth)
+	return getLibText(m, boxWidth), getPlayBack(m, boxWidth), m.image, getVisualQueue(m, boxWidth)
 }
 
 // Generate the library text for display
@@ -132,7 +133,7 @@ func getLibText(m Model, boxWidth int) string {
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE)+1)
+	libText += fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1)
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -163,7 +164,7 @@ func getLibText(m Model, boxWidth int) string {
 }
 
 // Generate the playback text for display
-func getPlayBack(m Model) string {
+func getPlayBack(m Model, width int) string {
 	if m.state.Item.Artists == nil {
 		return "No Playback Data. Please start a playback session on your device"
 	}
@@ -179,7 +180,7 @@ func getPlayBack(m Model) string {
 	progress := msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)
 	statusRendered := lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)
 
-	return bracketWrap(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name) +
+	return bracketWrap(truncate(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name, width)) +
 		bracketWrap(statusRendered) +
 		bracketWrap(progress) +
 		bracketWrap(shuffle)
