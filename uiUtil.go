@@ -31,6 +31,10 @@ var (
 	libraryStyle = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			Padding(0).Align(lipgloss.Left)
+
+	bold = lipgloss.NewStyle().Bold(true)
+
+	green = lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN))
 )
 
 // =======================
@@ -52,7 +56,7 @@ func bracketWrap(str string) string {
 	return fmt.Sprintf(" [ %s ] ", str)
 }
 
-// Turn ms to 5:30 format
+// Turn ms to MM:SS format
 func msToMinSec(ms int) string {
 	sec := ms / 1000
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
@@ -62,7 +66,7 @@ func msToMinSec(ms int) string {
 // ===== Album Cover Functionality =====
 // =====================================
 
-// given a color, return the ANSI color code
+// Given a color, return the ANSI color code
 func bgAnsiColor(c color.Color) string {
 	r, g, b, _ := c.RGBA()                                      // no alpha
 	return fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r>>8, g>>8, b>>8) // 16-bit color to 8-bit
@@ -133,7 +137,7 @@ func getLibText(m Model, boxWidth int) string {
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1)
+	libText += bold.Render(fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1))
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -142,7 +146,7 @@ func getLibText(m Model, boxWidth int) string {
 		for i, item := range m.libraryList {
 			if i == m.cursor {
 				item = LibraryItem{
-					name:     lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
+					name:     green.Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
 					artist:   item.artist,
 					uri:      item.uri,
 					favorite: item.favorite,
@@ -177,19 +181,18 @@ func getPlayBack(m Model, width int) string {
 		shuffle = "Shuffle"
 	}
 
-	progress := msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs)
-	statusRendered := lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN)).Render(status)
+	progress := bold.Render(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs))
+	statusRendered := green.Render(status)
 
 	return bracketWrap(truncate(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name, width)) +
 		bracketWrap(statusRendered) +
 		bracketWrap(progress) +
 		bracketWrap(shuffle)
-
 }
 
 // Generate the visual queue for display
 func getVisualQueue(m Model, boxWidth int) string {
-	queue := "Queue:\n"
+	queue := bold.Render("Queue:\n")
 	queueLen := len(m.queue.Queue)
 	SEP := " - "
 	for i, item := range m.queue.Queue {
