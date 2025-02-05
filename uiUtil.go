@@ -36,7 +36,7 @@ var (
 
 	green = lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN))
 
-	highlight = lipgloss.AdaptiveColor{Light: SPOTIFY_GREEN, Dark: "#FFFFFF"}
+	highlight = lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: SPOTIFY_GREEN}
 
 	activeTabBorder = lipgloss.Border{
 		Top:         "─",
@@ -176,7 +176,9 @@ func getLibText(m Model, boxWidth int) string {
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += bold.Render(fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(getFavorites(m)))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(getFavorites(m)))+1))
+	totalPages := int(math.Ceil(float64(m.apiTotal) / float64(m.height-UI_LIBRARY_SPACE-len(getFavorites(m))))) + 1
+	currentPage := int(math.Ceil(float64(m.offset) / float64(m.height-UI_LIBRARY_SPACE-len(getFavorites(m))))) + 1
+	libText += bold.Render(fmt.Sprintf("Page %d of %d", currentPage, totalPages))
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -185,7 +187,7 @@ func getLibText(m Model, boxWidth int) string {
 		for i, item := range m.libraryList {
 			if i == m.cursor {
 				item = LibraryItem{
-					name:     green.Render("> " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS)),
+					name:     green.Render("> " + bold.Render(truncate(item.name, boxWidth-len(item.artist)-CHARACTERS))),
 					artist:   item.artist,
 					uri:      item.uri,
 					favorite: item.favorite,
@@ -263,8 +265,8 @@ func getTabs(m Model, boxWidth int) string {
 
 	row := lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		albumTab.Render("1) album"),
-		playlistTab.Render("2) playlist"),
+		albumTab.Render("1) Albums"),
+		playlistTab.Render("2) Playlists"),
 	)
 	gap := tabGap.Render(strings.Repeat(" ", max(0, boxWidth-lipgloss.Width(row)-2)))
 	return lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)

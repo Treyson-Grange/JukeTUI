@@ -84,7 +84,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
 				m.favoriteAlbums, _ = readJSON(file)
-				
+
 			} else if favorites != nil && m.listDetail == "playlist" {
 				for _, fav := range m.favoritePlaylists {
 					if fav.URI == m.libraryList[m.cursor].uri {
@@ -160,6 +160,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.listDetail = "album"
 			m.loading = true
+			m.offset = 0
 			favorites := getFavorites(m)
 			return m, handleFetchLibrary(favorites, m.token, "album", m.height-LIBRARY_SPACING-len(favorites), 0)
 		case keybinds["Second Tab"]:
@@ -168,6 +169,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.listDetail = "playlist"
 			m.loading = true
+			m.offset = 0
 			favorites := getFavorites(m)
 			return m, handleFetchLibrary(favorites, m.token, "playlist", m.height-LIBRARY_SPACING-len(favorites), 0)
 		}
