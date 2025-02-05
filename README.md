@@ -66,6 +66,11 @@ Playback
 - Skip: n
 - Toggle shuffle: s
 
+Library Tabs
+
+- Albums: 1
+- Playlists: 1
+
 #### Custom Keybinds
 
 Custom keybinds for most major functionality is available through changes in your environment file.
