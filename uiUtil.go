@@ -20,7 +20,7 @@ import (
 const SPOTIFY_GREEN = "#1DB954"
 const UI_LIBRARY_SPACE = 7 // Space to subtract from total to get library space
 const CHARACTERS = 8       // Characters we have to account for when truncating
-const LIBRARY_SPACING = 10
+const LIBRARY_SPACING = 13 // TODO: Make this dynamic | Bigger number, less displayed
 
 var (
 	boxStyle = lipgloss.NewStyle().
@@ -35,6 +35,42 @@ var (
 	bold = lipgloss.NewStyle().Bold(true)
 
 	green = lipgloss.NewStyle().Foreground(lipgloss.Color(SPOTIFY_GREEN))
+
+	highlight = lipgloss.AdaptiveColor{Light: SPOTIFY_GREEN, Dark: "#FFFFFF"}
+
+	activeTabBorder = lipgloss.Border{
+		Top:         "─",
+		Bottom:      " ",
+		Left:        "│",
+		Right:       "│",
+		TopLeft:     "╭",
+		TopRight:    "╮",
+		BottomLeft:  "┘",
+		BottomRight: "└",
+	}
+
+	tabBorder = lipgloss.Border{
+		Top:         "─",
+		Bottom:      "─",
+		Left:        "│",
+		Right:       "│",
+		TopLeft:     "╭",
+		TopRight:    "╮",
+		BottomLeft:  "┴",
+		BottomRight: "┴",
+	}
+	tab = lipgloss.NewStyle().
+		Border(tabBorder, true).
+		BorderForeground(highlight).
+		Padding(0, 1)
+
+	activeTab = tab.Border(activeTabBorder, true)
+
+	tabGap = tab.
+		BorderTop(false).
+		BorderLeft(false).
+		BorderRight(false)
+
 )
 
 // =======================
@@ -134,10 +170,13 @@ func getUiElements(m Model, boxWidth int) (string, string, string, string) {
 // Generate the library text for display
 func getLibText(m Model, boxWidth int) string {
 	libText := ""
+
+	libText += getTabs(m, boxWidth) + "\n"
+
 	if m.libraryList == nil {
 		return "Loading Library Data..."
 	}
-	libText += bold.Render(fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(m.favorites))+1))
+	libText += bold.Render(fmt.Sprintf("Page %d of %d", m.offset/(m.height-UI_LIBRARY_SPACE-len(getFavorites(m)))+1, m.apiTotal/(m.height-UI_LIBRARY_SPACE-len(getFavorites(m)))+1))
 	if m.loading {
 		libText += "  Loading..."
 	}
@@ -198,13 +237,36 @@ func getVisualQueue(m Model, boxWidth int) string {
 	for i, item := range m.queue.Queue {
 		nameLen := len(item.Name)
 		artistLen := len(item.Artists[0].Name)
+		queueItem := ""
 		if len(SEP)+nameLen+artistLen > boxWidth {
-			item.Name = truncate(item.Name, boxWidth-3-artistLen)
+			queueItem = truncate(item.Name, boxWidth-artistLen-len(SEP)) + SEP + item.Artists[0].Name
+		} else {
+			queueItem = item.Name + SEP + item.Artists[0].Name
 		}
-		queue += fmt.Sprintf("%s - %s", item.Name, item.Artists[0].Name)
+		queue += fmt.Sprintf("%s", queueItem)
 		if i < queueLen-1 {
 			queue += "\n"
 		}
 	}
 	return queue
+}
+
+// Generate the tabs for the library with the active tab highlighted
+func getTabs(m Model, boxWidth int) string {
+	currentTab := m.listDetail
+	albumTab := activeTab
+	playlistTab := tab
+
+	if currentTab == "playlist" {
+		albumTab, playlistTab = tab, activeTab
+	}
+
+	row := lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		albumTab.Render("1) album"),
+		playlistTab.Render("2) playlist"),
+	)
+	gap := tabGap.Render(strings.Repeat(" ", max(0, boxWidth-lipgloss.Width(row)-2)))
+	return lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
+
 }
