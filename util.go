@@ -44,6 +44,8 @@ func checkArguments() {
 					"Cursor Up",
 					"Cursor Down",
 					"Quit",
+					"First Tab",
+					"Second Tab",
 				}
 				fmt.Println("Keybinds:")
 				for _, key := range order {
@@ -80,5 +82,16 @@ func setKeybinds() {
 		"Next Page":     "right",
 		"Previous Page": "left",
 		"Select":        "enter",
+		"First Tab":     "1",
+		"Second Tab":    "2",
+	}
+}
+
+// Given a model, return the list of favorites corresponding to the current list detail
+func getFavorites(m Model) []LibraryFavorite {
+	if m.listDetail == "album" {
+		return m.favoriteAlbums
+	} else {
+		return m.favoritePlaylists
 	}
 }

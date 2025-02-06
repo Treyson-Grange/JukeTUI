@@ -51,8 +51,11 @@ type Model struct {
 	// Total Library Items
 	apiTotal int
 
-	// Favorites list
-	favorites []LibraryFavorite
+	// Favorites list (albums)
+	favoriteAlbums []LibraryFavorite
+
+	// Favorites list (playlists)
+	favoritePlaylists []LibraryFavorite
 
 	// Queue list
 	queue Queue //This isnt what itll be

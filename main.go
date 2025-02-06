@@ -19,7 +19,7 @@ import (
 // ===== main.go | Entry point and loop =====
 // ==========================================
 
-func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
+func initialModel(token, listDetail string, favoriteAlbums, favoritePlaylists []LibraryFavorite) Model {
 	_, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		log.Fatalf("Failed to get terminal size: %v", err)
@@ -29,7 +29,8 @@ func initialModel(token, listDetail string, favorites []LibraryFavorite) Model {
 		token:      token,
 		listDetail: listDetail,
 		height:     height,
-		favorites:  favorites,
+		favoriteAlbums:  favoriteAlbums,
+		favoritePlaylists: favoritePlaylists,
 	}
 }
 
@@ -42,7 +43,7 @@ func (m Model) Init() tea.Cmd {
 		handleFetchPlayback(m.token),
 		handleGetLibraryTotal(m.token, m.listDetail),
 		scheduleProgressInc(1*time.Second),
-		handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), 0),
+		handleFetchLibrary(getFavorites(m), m.token, m.listDetail, m.height-LIBRARY_SPACING-len(getFavorites(m)), 0),
 		handleGetQueue(m.token),
 	)
 }
@@ -72,18 +73,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Favorites"]:
 			file := fmt.Sprintf("favorites/%ss.json", m.listDetail)
-			if m.favorites != nil {
-				for _, fav := range m.favorites {
+			favorites := getFavorites(m)
+			if favorites != nil && m.listDetail == "album" {
+				for _, fav := range m.favoriteAlbums {
 					if fav.URI == m.libraryList[m.cursor].uri {
 						removeFromJSON(file, fav)
-						m.favorites, _ = readJSON(file)
-						return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+						m.favoriteAlbums, _ = readJSON(file)
+						return m, handleFetchLibrary(m.favoriteAlbums, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favoriteAlbums), m.offset)
 					}
 				}
 				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
+				m.favoriteAlbums, _ = readJSON(file)
+
+			} else if favorites != nil && m.listDetail == "playlist" {
+				for _, fav := range m.favoritePlaylists {
+					if fav.URI == m.libraryList[m.cursor].uri {
+						removeFromJSON(file, fav)
+						m.favoritePlaylists, _ = readJSON(file)
+						return m, handleFetchLibrary(m.favoritePlaylists, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favoritePlaylists), m.offset)
+					}
+				}
+				writeJSONFile(file, LibraryFavorite{m.libraryList[m.cursor].name, m.libraryList[m.cursor].artist, m.libraryList[m.cursor].uri})
+				m.favoritePlaylists, _ = readJSON(file)
 			}
-			m.favorites, _ = readJSON(file)
-			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+			favorites, _ = readJSON(file)
+			return m, handleFetchLibrary(favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(favorites), m.offset)
 
 		case keybinds["Cursor Up"]:
 			if m.cursor > 0 {
@@ -101,30 +115,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case keybinds["Next Page"]:
 			m.loading = true
-			if m.offset+m.height-LIBRARY_SPACING-len(m.favorites) < m.apiTotal {
+			favorites := getFavorites(m)
+			if m.offset+m.height-LIBRARY_SPACING-len(favorites) < m.apiTotal {
 				if m.offset == 0 {
-					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites))
+					m.offset += m.height - (UI_LIBRARY_SPACE + len(favorites))
 				} else {
-					m.offset += m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
+					m.offset += m.height - (UI_LIBRARY_SPACE + len(favorites)) - 3
 				}
 			} else {
 				m.offset = 0
 			}
-			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+			return m, handleFetchLibrary(favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(favorites), m.offset)
 
 		case keybinds["Previous Page"]:
 			m.loading = true
-			page := m.offset/(m.height-(UI_LIBRARY_SPACE+len(m.favorites))) + 1
+			favorites := getFavorites(m)
+			page := m.offset/(m.height-(UI_LIBRARY_SPACE+len(favorites))) + 1
 			if page > 1 {
-				if m.offset == m.height-(UI_LIBRARY_SPACE+len(m.favorites)) {
-					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites))
+				if m.offset == m.height-(UI_LIBRARY_SPACE+len(favorites)) {
+					m.offset -= m.height - (UI_LIBRARY_SPACE + len(favorites))
 				} else {
-					m.offset -= m.height - (UI_LIBRARY_SPACE + len(m.favorites)) - 3
+					m.offset -= m.height - (UI_LIBRARY_SPACE + len(favorites)) - 3
 				}
 			} else {
-				m.offset = m.apiTotal - (m.apiTotal % (m.height - (UI_LIBRARY_SPACE + len(m.favorites))))
+				m.offset = m.apiTotal - (m.apiTotal % (m.height - (UI_LIBRARY_SPACE + len(favorites))))
 			}
-			return m, handleFetchLibrary(m.favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(m.favorites), m.offset)
+			return m, handleFetchLibrary(favorites, m.token, m.listDetail, m.height-LIBRARY_SPACING-len(favorites), m.offset)
 
 		case keybinds["Select"]:
 			if m.state.IsPlaying {
@@ -138,6 +154,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 			}
+		case keybinds["First Tab"]:
+			if (m.listDetail == "album") {
+				return m, nil
+			}
+			m.listDetail = "album"
+			m.loading = true
+			m.offset = 0
+			favorites := getFavorites(m)
+			return m, handleFetchLibrary(favorites, m.token, "album", m.height-LIBRARY_SPACING-len(favorites), 0)
+		case keybinds["Second Tab"]:
+			if (m.listDetail == "playlist") {
+				return m, nil
+			}
+			m.listDetail = "playlist"
+			m.loading = true
+			m.offset = 0
+			favorites := getFavorites(m)
+			return m, handleFetchLibrary(favorites, m.token, "playlist", m.height-LIBRARY_SPACING-len(favorites), 0)
 		}
 
 	case PlaybackState:
@@ -165,18 +199,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case SpotifyAlbum:
 		m.libraryList = nil
-		for _, album := range m.favorites {
+		favorites := getFavorites(m)
+		for _, album := range favorites {
 			m.libraryList = append(m.libraryList, LibraryItem{name: album.Title, artist: album.Author, uri: album.URI, favorite: true})
 		}
 		for _, album := range msg.Items {
 			m.libraryList = append(m.libraryList, LibraryItem{name: album.Album.Name, artist: album.Album.Artists[0].Name, uri: album.Album.URI, favorite: false})
-			m.apiTotal = msg.Total - len(m.favorites)
+			m.apiTotal = msg.Total - len(favorites)
 			m.loading = false
 		}
 
 	case SpotifyPlaylist:
 		m.libraryList = nil
-		for _, playlist := range m.favorites {
+		favorites := getFavorites(m)
+		for _, playlist := range favorites {
 			m.libraryList = append(m.libraryList, LibraryItem{name: playlist.Title, artist: playlist.Author, uri: playlist.URI, favorite: true})
 		}
 		for _, playlist := range msg.Items {
@@ -248,7 +284,7 @@ func main() {
 
 	clientID := os.Getenv("SPOTIFY_ID")
 	clientSecret := os.Getenv("SPOTIFY_SECRET")
-	listDetail := os.Getenv("SPOTIFY_PREFERENCE")
+	listDetail := "album"
 
 	setKeybinds()
 
@@ -263,13 +299,19 @@ func main() {
 	}
 	fmt.Println("Login successful! Access token retrieved.\n" + fmt.Sprintf("Press '%s' to Play/Pause, '%s' to Skip, '%s' to Quit", keybinds["Play/Pause"], keybinds["Skip"], keybinds["Quit"]))
 
-	favorites, success := readJSON(fmt.Sprintf("favorites/%ss.json", listDetail))
+	favoriteAlbums, success := readJSON(fmt.Sprintf("favorites/albums.json"))
 	if !success {
 		fmt.Println("No favorites found. Creating new favorites file.")
-		createEmptyJSONFile(fmt.Sprintf("favorites/%ss.json", listDetail))
+		createEmptyJSONFile(fmt.Sprintf("favorites/albums.json"))
 	}
 
-	model := initialModel(token.AccessToken, listDetail, favorites)
+	favoritePlaylists, success := readJSON(fmt.Sprintf("favorites/playlists.json"))
+	if !success {
+		fmt.Println("No favorites found. Creating new favorites file.")
+		createEmptyJSONFile(fmt.Sprintf("favorites/playlists.json"))
+	}
+
+	model := initialModel(token.AccessToken, listDetail, favoriteAlbums, favoritePlaylists)
 	model.refreshToken = token.RefreshToken
 	model.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 
