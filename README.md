@@ -1,5 +1,20 @@
 # JukeTUI
 
+## Disclaimer
+
+Since the announcement that Spotify's CEO had funded Helsin, an AI centered military firm, 600 Million euros, I have cancelled my spotify subscription, and I urge you to do the same.
+
+With ending my subscription, this project is in its final state.
+
+My journey off of Spotify and streaming has been nothing but a wondrous journey full of new music, fresh ideas, and most importantly, very cheap (besides a bit of startup).
+
+If you are looking for solutions, there are many all over the internet. I will outline mine below.
+
+- Hiby R1 DAP. Extensible storage up to 2 TB via SD, and works great for its purpose.
+- Music Gathering. cds, casetes, and vinyls, digital music straight from the artist, Bancamp, and ripping cds. There are other methods. Please support the artist when possible.
+
+Hold companies responsible.
+
 JukeTUI is a tangible user interface (TUI) that allows users to control Spotify, manage playback, monitor the queue, and view pixelated versions of their album covers through an intuitive jukebox system.
 
 ![JukeTUI App Preview](/screenshots/app-preview.png)
