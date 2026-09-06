@@ -1,10 +1,12 @@
-package main
+package util
 
 import (
 	"encoding/json"
 	"io"
 	"log"
 	"os"
+
+	"github.com/treyson-grange/JukeTUI/src/types"
 )
 
 // =========================================
@@ -12,21 +14,21 @@ import (
 // =========================================
 
 // Open file and return file
-func openFile(filePath string) (*os.File, bool) {
+func OpenFile(filePath string) (*os.File, bool) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		errorLogger.Println("Failed to open file: ", err)
+		ErrorLogger.Println("Failed to open file: ", err)
 		return nil, false
 	}
 	return file, true
 }
 
-// Read the JSON file and return a slice of LibraryFavorite structs.
-func readJSON(filePath string) ([]LibraryFavorite, bool) {
-	file, _ := openFile(filePath)
+// Read the JSON file and return a slice of types.LibraryFavorite structs.
+func ReadJSON(filePath string) ([]types.LibraryFavorite, bool) {
+	file, _ := OpenFile(filePath)
 	defer file.Close()
 
-	favorites := []LibraryFavorite{}
+	favorites := []types.LibraryFavorite{}
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&favorites); err != nil {
 		return nil, false
@@ -36,19 +38,19 @@ func readJSON(filePath string) ([]LibraryFavorite, bool) {
 }
 
 // Use os.WriteFile to write a new favorite to the JSON file.
-func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
-	file, _ := openFile(filePath)
+func WriteJSONFile(filePath string, favorite types.LibraryFavorite) bool {
+	file, _ := OpenFile(filePath)
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		errorLogger.Println("Failed to read albums.json: ", err)
+		ErrorLogger.Println("Failed to read albums.json: ", err)
 		return false
 	}
 
-	var favorites []LibraryFavorite
+	var favorites []types.LibraryFavorite
 	if err := json.Unmarshal(data, &favorites); err != nil {
-		errorLogger.Println("Failed to unmarshal JSON: ", err)
+		ErrorLogger.Println("Failed to unmarshal JSON: ", err)
 		return false
 	}
 
@@ -68,16 +70,16 @@ func writeJSONFile(filePath string, favorite LibraryFavorite) bool {
 }
 
 // Use os.WriteFile to remove a favorite from the JSON file.
-func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
+func RemoveFromJSON(filePath string, oldFavorite types.LibraryFavorite) bool {
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		return false
 	}
-	var favorites []LibraryFavorite
+	var favorites []types.LibraryFavorite
 	if err := json.Unmarshal(fileData, &favorites); err != nil {
 		return false
 	}
-	var updatedFavorites []LibraryFavorite
+	var updatedFavorites []types.LibraryFavorite
 	for _, f := range favorites {
 		if f.Title != oldFavorite.Title || f.Author != oldFavorite.Author || f.URI != oldFavorite.URI {
 			updatedFavorites = append(updatedFavorites, f)
@@ -100,7 +102,7 @@ func removeFromJSON(filePath string, oldFavorite LibraryFavorite) bool {
 }
 
 // Use os.WriteFile to create an empty JSON file.
-func createEmptyJSONFile(filePath string) bool {
+func CreateEmptyJSONFile(filePath string) bool {
 	emptyData := []byte("[]")
 	if err := os.WriteFile(filePath, emptyData, 0644); err != nil {
 		return false

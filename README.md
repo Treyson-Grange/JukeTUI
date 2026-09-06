@@ -40,7 +40,7 @@ JukeTUI uses the Spotify Web API, which doesn't handle playback on its own. Ther
 2. You will need to "Create app" and follow the instructions there.
 3. In the settings of the new app, you will find a client ID and client secret
 4. Copy `.env.example` into `.env` and paste your client ID and client secret into the corresponding variables.
-5. You will then have to setup a Redirect URI. This is done in the app dashboard. click settings, Edit, and change the Redirect URIs and set it to `http://localhost:8080/callback`
+5. You will then have to setup a Redirect URI. This is done in the app dashboard. click settings, Edit, and change the Redirect URIs and set it to `http://127.0.0.1:8080/callback`
 6. On run, you will be asked to grant spotify permissions.
 7. On return, you will be in the app, ready to go.
 
@@ -61,7 +61,27 @@ SPOTIFY_PREFERENCE="{ Either 'album' or 'playlist' }"
 
 ## Use
 
-To run JukeTUI, simply run `go run .`.
+### Building
+
+To build JukeTUI, run:
+
+```bash
+go build -o JukeTUI ./src
+```
+
+### Running
+
+To run JukeTUI directly:
+
+```bash
+go run ./src
+```
+
+Or run the compiled binary:
+
+```bash
+./JukeTUI
+```
 
 ### Keybinds
 

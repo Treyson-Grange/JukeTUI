@@ -1,10 +1,12 @@
-package main
+package spotify
 
 import (
 	"fmt"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/treyson-grange/JukeTUI/src/types"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -15,7 +17,7 @@ import (
 
 const SPOTIFY_API = "https://api.spotify.com/v1"
 
-// createEndpoint creates a full endpoint URL with query parameters.
+// CreateEndpoint creates a full endpoint URL with query parameters.
 //
 // Parameters:
 // - endpoint: the endpoint to fetch data from
@@ -23,7 +25,7 @@ const SPOTIFY_API = "https://api.spotify.com/v1"
 //
 // Returns:
 // - string: the full endpoint URL, with query parameters if any.
-func createEndpoint(endpoint string, queryParams map[string]string) string { // TODO: Test this lol.
+func CreateEndpoint(endpoint string, queryParams map[string]string) string { // TODO: Test this lol.
 	endpoint = fmt.Sprintf("%s%s", SPOTIFY_API, endpoint)
 	if len(queryParams) == 0 {
 		return endpoint
@@ -37,17 +39,6 @@ func createEndpoint(endpoint string, queryParams map[string]string) string { // 
 	return fmt.Sprintf("%s?%s", endpoint, query.Encode())
 }
 
-// Check if the token is expired
-//
-// Parameters:
-// - s: the SpotifyTokenResponse to check
-//
-// Returns:
-// - bool: true if the token is expired, false otherwise
-func (s *SpotifyTokenResponse) IsExpired() bool {
-	return time.Now().After(time.Now().Add(time.Duration(s.ExpiresIn) * time.Second))
-}
-
 // CheckTokenExpiryCmd refreshes the token if it has expired.
 //
 // Parameters:
@@ -55,9 +46,9 @@ func (s *SpotifyTokenResponse) IsExpired() bool {
 //
 // Returns:
 // - tea.Cmd: a command to refresh the token if it has expired
-func CheckTokenExpiryCmd(m Model) tea.Cmd {
-	if time.Now().After(m.tokenExpiresAt) {
-		return refreshSpotifyTokenCmd(m.refreshToken, os.Getenv("SPOTIFY_ID"), os.Getenv("SPOTIFY_SECRET"))
+func CheckTokenExpiryCmd(m *types.Model) tea.Cmd {
+	if time.Now().After(m.TokenExpiresAt) {
+		return RefreshSpotifyTokenCmd(m.RefreshToken, os.Getenv("SPOTIFY_ID"), os.Getenv("SPOTIFY_SECRET"))
 	}
 	return nil
 }

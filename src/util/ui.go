@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"fmt"
@@ -10,6 +10,8 @@ import (
 	"math"
 	"net/http"
 	"strings"
+
+	"github.com/treyson-grange/JukeTUI/src/types"
 
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/image/draw"
@@ -23,12 +25,12 @@ const CHARACTERS = 8       // Characters we have to account for when truncating
 const LIBRARY_SPACING = 13 // TODO: Make this dynamic | Bigger number, less displayed
 
 var (
-	boxStyle = lipgloss.NewStyle().
+	BoxStyle = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			Padding(1).
 			Align(lipgloss.Center)
 
-	libraryStyle = lipgloss.NewStyle().
+	LibraryStyle = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			Padding(0).Align(lipgloss.Left)
 
@@ -70,7 +72,6 @@ var (
 		BorderTop(false).
 		BorderLeft(false).
 		BorderRight(false)
-
 )
 
 // =======================
@@ -78,7 +79,7 @@ var (
 // =======================
 
 // Truncate a string to fit any width
-func truncate(str string, width int) string {
+func Truncate(str string, width int) string {
 	if len(str) > width {
 		if width > 5 {
 			return str[:width-5] + "..."
@@ -88,12 +89,12 @@ func truncate(str string, width int) string {
 }
 
 // Wrap a string in brackets
-func bracketWrap(str string) string {
+func BracketWrap(str string) string {
 	return fmt.Sprintf(" [ %s ] ", str)
 }
 
 // Turn ms to MM:SS format
-func msToMinSec(ms int) string {
+func MsToMinSec(ms int) string {
 	sec := ms / 1000
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
@@ -103,13 +104,13 @@ func msToMinSec(ms int) string {
 // =====================================
 
 // Given a color, return the ANSI color code
-func bgAnsiColor(c color.Color) string {
+func BgAnsiColor(c color.Color) string {
 	r, g, b, _ := c.RGBA()                                      // no alpha
 	return fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r>>8, g>>8, b>>8) // 16-bit color to 8-bit
 }
 
 // Resize an image to a given width and height
-func resizeImage(img image.Image, width, height int) image.Image {
+func ResizeImage(img image.Image, width, height int) image.Image {
 	dst := image.NewRGBA(image.Rect(0, 0, width, height))
 	if img == nil || dst == nil {
 		return nil
@@ -119,7 +120,7 @@ func resizeImage(img image.Image, width, height int) image.Image {
 }
 
 // Print an image to display
-func printImage(img image.Image) string {
+func PrintImage(img image.Image) string {
 	bounds := img.Bounds()
 	var result strings.Builder
 
@@ -128,7 +129,7 @@ func printImage(img image.Image) string {
 		var line strings.Builder
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			color := img.At(x, y)
-			line.WriteString(fmt.Sprintf("%s  \x1b[0m", bgAnsiColor(color)))
+			line.WriteString(fmt.Sprintf("%s  \x1b[0m", BgAnsiColor(color)))
 		}
 		result.WriteString(line.String() + "\n")
 	}
@@ -136,7 +137,7 @@ func printImage(img image.Image) string {
 }
 
 // Simple fetch for an image given a URL
-func fetchImage(url string) (image.Image, error) {
+func FetchImage(url string) (image.Image, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -148,14 +149,14 @@ func fetchImage(url string) (image.Image, error) {
 }
 
 // Handler for fetching an image, resizing it, and returning it as a string
-func makeNewImage(url string, width, height int) string {
-	img, err := fetchImage(url)
+func MakeNewImage(url string, width, height int) string {
+	img, err := FetchImage(url)
 	if err != nil {
 		return "Error fetching image"
 	}
 
 	albumSize := math.Min(float64(width), float64(height))
-	return printImage(resizeImage(img, int(albumSize), int(albumSize)))
+	return PrintImage(ResizeImage(img, int(albumSize*11/10), int(albumSize)))
 }
 
 // =======================
@@ -163,85 +164,89 @@ func makeNewImage(url string, width, height int) string {
 // =======================
 
 // Get the UI elements for display
-func getUiElements(m Model, boxWidth int) (string, string, string, string) {
-	return getLibText(m, boxWidth), getPlayBack(m, boxWidth), m.image, getVisualQueue(m, boxWidth)
+func GetUiElements(m *types.Model, boxWidth, maxQueueHeight int) (string, string, string, string) {
+	return GetLibText(m, boxWidth), GetPlayBack(m, boxWidth), m.Image, GetVisualQueue(m, boxWidth, maxQueueHeight)
 }
 
 // Generate the library text for display
-func getLibText(m Model, boxWidth int) string {
+func GetLibText(m *types.Model, boxWidth int) string {
 	libText := ""
 
-	libText += getTabs(m, boxWidth) + "\n"
+	libText += GetTabs(m, boxWidth) + "\n"
 
-	if m.libraryList == nil {
+	if m.LibraryList == nil {
 		return "Loading Library Data..."
 	}
-	totalPages := int(math.Ceil(float64(m.apiTotal) / float64(m.height-UI_LIBRARY_SPACE-len(getFavorites(m))))) + 1
-	currentPage := int(math.Ceil(float64(m.offset) / float64(m.height-UI_LIBRARY_SPACE-len(getFavorites(m))))) + 1
+	totalPages := int(math.Ceil(float64(m.ApiTotal)/float64(m.Height-UI_LIBRARY_SPACE-len(GetFavorites(m))))) + 1
+	currentPage := int(math.Ceil(float64(m.Offset)/float64(m.Height-UI_LIBRARY_SPACE-len(GetFavorites(m))))) + 1
 	libText += bold.Render(fmt.Sprintf("Page %d of %d", currentPage, totalPages))
-	if m.loading {
+	if m.Loading {
 		libText += "  Loading..."
 	}
 	libText += "\n"
-	if m.libraryList != nil {
-		for i, item := range m.libraryList {
-			if i == m.cursor {
-				item = LibraryItem{
-					name:     green.Render("> " + bold.Render(truncate(item.name, boxWidth-len(item.artist)-CHARACTERS))),
-					artist:   item.artist,
-					uri:      item.uri,
-					favorite: item.favorite,
+	if m.LibraryList != nil {
+		for i, item := range m.LibraryList {
+			if i == m.Cursor {
+				item = types.LibraryItem{
+					Name:     green.Render("> " + bold.Render(Truncate(item.Name, boxWidth-len(item.Artist)-CHARACTERS))),
+					Artist:   item.Artist,
+					URI:      item.URI,
+					Favorite: item.Favorite,
 				}
 			} else {
-				item = LibraryItem{
-					name:     "  " + truncate(item.name, boxWidth-len(item.artist)-CHARACTERS),
-					artist:   item.artist,
-					uri:      item.uri,
-					favorite: item.favorite,
+				item = types.LibraryItem{
+					Name:     "  " + Truncate(item.Name, boxWidth-len(item.Artist)-CHARACTERS),
+					Artist:   item.Artist,
+					URI:      item.URI,
+					Favorite: item.Favorite,
 				}
 			}
-			play := map[bool]string{true: " 🔊", false: ""}[m.state.Context.URI == item.uri]
-			favorite := map[bool]string{true: "♥ ", false: "  "}[item.favorite]
-			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, moji.FilterEmojisBySize(item.name, 2), item.artist, play)
+			play := map[bool]string{true: " 🔊", false: ""}[m.State.Context.URI == item.URI]
+			favorite := map[bool]string{true: "♥ ", false: "  "}[item.Favorite]
+			libText += fmt.Sprintf("%s%s - %s%s\n", favorite, moji.FilterEmojisBySize(item.Name, 2), item.Artist, play)
 		}
 	}
 	return libText
 }
 
 // Generate the playback text for display
-func getPlayBack(m Model, width int) string {
-	if m.state.Item.Artists == nil {
+func GetPlayBack(m *types.Model, width int) string {
+	if m.State.Item.Artists == nil {
 		return "No Playback Data. Please start a playback session on your device"
 	}
 	status := "▶ "
-	if m.state.IsPlaying {
+	if m.State.IsPlaying {
 		status = "▮▮"
 	}
 	shuffle := "!Shuffle"
-	if m.state.ShuffleState {
+	if m.State.ShuffleState {
 		shuffle = "Shuffle"
 	}
 
-	progress := bold.Render(msToMinSec(m.progressMs) + " / " + msToMinSec(m.state.Item.DurationMs))
+	progress := bold.Render(MsToMinSec(m.ProgressMs) + " / " + MsToMinSec(m.State.Item.DurationMs))
 	statusRendered := green.Render(status)
 
-	return bracketWrap(truncate(m.state.Item.Name + " | " + m.state.Item.Artists[0].Name, width)) +
-		bracketWrap(statusRendered) +
-		bracketWrap(progress) +
-		bracketWrap(shuffle)
+	return BracketWrap(Truncate(m.State.Item.Name+" | "+m.State.Item.Artists[0].Name, width)) +
+		BracketWrap(statusRendered) +
+		BracketWrap(progress) +
+		BracketWrap(shuffle)
 }
 
 // Generate the visual queue for display
-func getVisualQueue(m Model, boxWidth int) string {
+func GetVisualQueue(m *types.Model, boxWidth, maxItems int) string {
 	queue := bold.Render("Queue:\n")
-	queueLen := len(m.queue.Queue)
+	queueLen := len(m.Queue.Queue)
+	if queueLen > maxItems {
+		queueLen = maxItems
+	}
 	SEP := " - "
-	for i, item := range m.queue.Queue {
+	for i := 0; i < queueLen; i++ {
+		item := m.Queue.Queue[i]
 		nameLen := len(item.Name)
 		artistLen := len(item.Artists[0].Name)
 		queueItem := ""
 		if len(SEP)+nameLen+artistLen > boxWidth {
-			queueItem = truncate(item.Name, boxWidth-artistLen-len(SEP)) + SEP + item.Artists[0].Name
+			queueItem = Truncate(item.Name, boxWidth-artistLen-len(SEP)) + SEP + item.Artists[0].Name
 		} else {
 			queueItem = item.Name + SEP + item.Artists[0].Name
 		}
@@ -254,8 +259,8 @@ func getVisualQueue(m Model, boxWidth int) string {
 }
 
 // Generate the tabs for the library with the active tab highlighted
-func getTabs(m Model, boxWidth int) string {
-	currentTab := m.listDetail
+func GetTabs(m *types.Model, boxWidth int) string {
+	currentTab := m.ListDetail
 	albumTab := activeTab
 	playlistTab := tab
 

@@ -1,4 +1,4 @@
-package main
+package spotify
 
 import (
 	"bytes"
@@ -7,13 +7,15 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/treyson-grange/JukeTUI/src/util"
 )
 
 // =====================================
 // ===== spotifyRequests.go | Interact with Spotify API =====
 // =====================================
 
-// genericRequest makes an HTTP request to the Spotify API and returns the response as a struct or a response code.
+// GenericRequest makes an HTTP request to the Spotify API and returns the response as a struct or a response code.
 //
 // Parameters:
 // - method: the HTTP method to use (GET, POST, PUT)
@@ -29,7 +31,7 @@ import (
 //
 // Type Parameters:
 // - T: the type of the response data
-func genericRequest[T any](method, endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, int, error) {
+func GenericRequest[T any](method, endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, int, error) {
 	var result T
 	var resp *http.Response
 
@@ -43,7 +45,7 @@ func genericRequest[T any](method, endpoint, accessToken string, queryParams, bo
 		body = bytes.NewReader(bodyJSON)
 	}
 
-	req, err := http.NewRequest(method, createEndpoint(endpoint, queryParams), body)
+	req, err := http.NewRequest(method, CreateEndpoint(endpoint, queryParams), body)
 	if err != nil {
 		return result, 500, err
 	}
@@ -74,24 +76,24 @@ func genericRequest[T any](method, endpoint, accessToken string, queryParams, bo
 			return result, resp.StatusCode, err
 		}
 	}
-	infoLogger.Printf("Successful %s %s %d", method, endpoint, resp.StatusCode)
+	util.InfoLogger.Printf("Successful %s %s %d", method, endpoint, resp.StatusCode)
 	return result, resp.StatusCode, nil
 }
 
-// genericFetch makes a GET request to the Spotify API and returns the response as a struct.
-func genericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
-	result, _, err := genericRequest[T](http.MethodGet, endpoint, accessToken, queryParams, bodyArgs)
+// GenericFetch makes a GET request to the Spotify API and returns the response as a struct.
+func GenericFetch[T any](endpoint, accessToken string, queryParams, bodyArgs map[string]string) (T, error) {
+	result, _, err := GenericRequest[T](http.MethodGet, endpoint, accessToken, queryParams, bodyArgs)
 	return result, err
 }
 
-// genericPut makes a PUT request to the Spotify API and returns the response code.
-func genericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
-	_, statusCode, err := genericRequest[struct{}](http.MethodPut, endpoint, accessToken, queryParams, bodyArgs)
+// GenericPut makes a PUT request to the Spotify API and returns the response code.
+func GenericPut(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
+	_, statusCode, err := GenericRequest[struct{}](http.MethodPut, endpoint, accessToken, queryParams, bodyArgs)
 	return statusCode, err
 }
 
-// genericPost makes a POST request to the Spotify API and returns the response code.
-func genericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
-	_, statusCode, err := genericRequest[struct{}](http.MethodPost, endpoint, accessToken, queryParams, bodyArgs)
+// GenericPost makes a POST request to the Spotify API and returns the response code.
+func GenericPost(endpoint, accessToken string, queryParams, bodyArgs map[string]string) (int, error) {
+	_, statusCode, err := GenericRequest[struct{}](http.MethodPost, endpoint, accessToken, queryParams, bodyArgs)
 	return statusCode, err
 }

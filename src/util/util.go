@@ -1,9 +1,11 @@
-package main
+package util
 
 import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/treyson-grange/JukeTUI/src/types"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -12,24 +14,27 @@ import (
 // ===== util.go | General Program Utils =====
 // ===========================================
 
+// Keybinds stores the application keybinds
+var Keybinds map[string]string
+
 // Schedule the next fetch of the playback state.
-func scheduleNextFetch(d time.Duration) tea.Cmd {
+func ScheduleNextFetch(d time.Duration) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(d)
-		return playbackMsg{}
+		return types.PlaybackMsg{}
 	}
 }
 
 // Schedule the next increment of the progress bar.
-func scheduleProgressInc(d time.Duration) tea.Cmd {
+func ScheduleProgressInc(d time.Duration) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(d)
-		return progressMsg{}
+		return types.ProgressMsg{}
 	}
 }
 
 // Check if the user has passed in any arguments
-func checkArguments() {
+func CheckArguments() {
 	if len(os.Args) > 1 {
 		for _, arg := range os.Args {
 			if arg == "-h" || arg == "--help" {
@@ -49,7 +54,7 @@ func checkArguments() {
 				}
 				fmt.Println("Keybinds:")
 				for _, key := range order {
-					fmt.Printf("\t%s: %s\n", key, keybinds[key])
+					fmt.Printf("\t%s: %s\n", key, Keybinds[key])
 				}
 				os.Exit(0)
 			}
@@ -62,7 +67,7 @@ func checkArguments() {
 }
 
 // Query an environment variable, returning a default value if it is not set
-func queryEnv(envKey, defaultValue string) string {
+func QueryEnv(envKey, defaultValue string) string {
 	if v := os.Getenv(envKey); v != "" {
 		return v
 	}
@@ -70,13 +75,13 @@ func queryEnv(envKey, defaultValue string) string {
 }
 
 // Set the keybinds for the application
-func setKeybinds() {
-	keybinds = map[string]string{
-		"Quit":          queryEnv("QUIT", "q"),
-		"Play/Pause":    queryEnv("PLAYPAUSE", "p"),
-		"Skip":          queryEnv("SKIP", "n"),
-		"Shuffle":       queryEnv("SHUFFLE", "s"),
-		"Favorites":     queryEnv("FAVORITES", "f"),
+func SetKeybinds() {
+	Keybinds = map[string]string{
+		"Quit":          QueryEnv("QUIT", "q"),
+		"Play/Pause":    QueryEnv("PLAYPAUSE", "p"),
+		"Skip":          QueryEnv("SKIP", "n"),
+		"Shuffle":       QueryEnv("SHUFFLE", "s"),
+		"Favorites":     QueryEnv("FAVORITES", "f"),
 		"Cursor Up":     "up",
 		"Cursor Down":   "down",
 		"Next Page":     "right",
@@ -88,10 +93,10 @@ func setKeybinds() {
 }
 
 // Given a model, return the list of favorites corresponding to the current list detail
-func getFavorites(m Model) []LibraryFavorite {
-	if m.listDetail == "album" {
-		return m.favoriteAlbums
+func GetFavorites(m *types.Model) []types.LibraryFavorite {
+	if m.ListDetail == "album" {
+		return m.FavoriteAlbums
 	} else {
-		return m.favoritePlaylists
+		return m.FavoritePlaylists
 	}
 }

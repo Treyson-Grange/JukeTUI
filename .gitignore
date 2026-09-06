@@ -1,6 +1,8 @@
 .env
 JukeTUI
+JukeTUI-new
 *.log
 
-favorites/*.json
+data/favorites/*.json
+data/logs/*.log
 .vscode

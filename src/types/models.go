@@ -1,71 +1,62 @@
-package main
+package types
 
 import (
 	"time"
 )
 
-// =====================================
-// ===== models.go | Data models =======
-// =====================================
-
+// Model for the application state
 type Model struct {
 	//Playback state, including track info, playback status, etc.
-	state PlaybackState
+	State PlaybackState
 
 	//Spotify web API access token. Lasts for 1 hour.
-	token string
+	Token string
 
 	//Spotify web API refresh token. Used to get a new access token when the current one is close to expiration.
-	refreshToken string
+	RefreshToken string
 
 	//Time when the current access token expires.
-	tokenExpiresAt time.Time
+	TokenExpiresAt time.Time
 
 	//Error message, if any
-	errMsg string
+	ErrMsg string
 
 	//Whether or not we're currently fetching access token initially
-	loading bool
+	Loading bool
 
 	//List detail, either "album" or "playlist".
-	listDetail string
+	ListDetail string
 
 	//Cursor for the list of albums/playlists.
-	cursor int
+	Cursor int
 
 	//List of albums/playlists.
-	libraryList []LibraryItem
+	LibraryList []LibraryItem
 
 	//Height of the list of albums/playlists.
-	height int
+	Height int
 
 	//Progress of current track in ms
-	progressMs int
+	ProgressMs int
 
 	// Album cover image as string
-	image string
+	Image string
 
 	// Offset for pagination of albums/playlists
-	offset int
+	Offset int
 
 	// Total Library Items
-	apiTotal int
+	ApiTotal int
 
 	// Favorites list (albums)
-	favoriteAlbums []LibraryFavorite
+	FavoriteAlbums []LibraryFavorite
 
 	// Favorites list (playlists)
-	favoritePlaylists []LibraryFavorite
+	FavoritePlaylists []LibraryFavorite
 
 	// Queue list
-	queue Queue //This isnt what itll be
+	Queue Queue //This isnt what itll be
 }
-
-// playbackMsg tells the update to fetch playback state.
-type playbackMsg struct{}
-
-// progressMsg tells the update to update the progress of the current track.
-type progressMsg struct{}
 
 // SpotifyTokenResponse struct for parsing the access token response.
 type SpotifyTokenResponse struct {
@@ -157,10 +148,10 @@ type SpotifyPlaylistItem struct {
 
 // LibraryItem struct for storing album/playlist information.
 type LibraryItem struct {
-	name     string
-	artist   string
-	uri      string
-	favorite bool
+	Name     string
+	Artist   string
+	URI      string
+	Favorite bool
 }
 
 // LibraryFavorite struct for storing favorite album/playlist information.
@@ -187,3 +178,14 @@ type QueueItem struct {
 		Name string `json:"name"`
 	} `json:"artists"`
 }
+
+// IsExpired checks if the token is expired
+func (s *SpotifyTokenResponse) IsExpired() bool {
+	return time.Now().After(time.Now().Add(time.Duration(s.ExpiresIn) * time.Second))
+}
+
+// PlaybackMsg tells the update to fetch playback state.
+type PlaybackMsg struct{}
+
+// ProgressMsg tells the update to update the progress of the current track.
+type ProgressMsg struct{}
